@@ -147,6 +147,8 @@ model Device {
 
 model DeviceInstance {
   id        String   @id @default(cuid())
+  frequency Int
+  duration  Float
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   deviceId  String

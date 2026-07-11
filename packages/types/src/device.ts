@@ -1,8 +1,7 @@
 export type Device = {
-  id: string;
-  powerDraw: number;
-  stockName: string;
+  id?: string;
   name: string;
+  powerDraw: number;
 }
 
 export type DeviceInstance = {
