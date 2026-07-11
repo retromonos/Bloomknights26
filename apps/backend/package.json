@@ -20,7 +20,8 @@
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
     "morgan": "~1.9.1",
-    "pg": "^8.22.0"
+    "pg": "^8.22.0",
+    "@bloomknights/types": "*"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
