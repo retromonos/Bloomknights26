@@ -20,13 +20,17 @@ export default function LandingPage() {
     
     if(signInInstead) {
       const signin = await handleSignin(acc.email, acc.password, acc.name)
-      update('account', { name: signin.user.name, email: signin.user.email, token: signin.token, isDemo: true })
+      if(signin) {
+        update('account', { name: signin.user.name, email: signin.user.email, token: signin.token, isDemo: true })
+        navigate({to: "/week"})
+      }
     } else {
       const signup = await handleSignup(acc.email, acc.password, acc.name)
       update('account', { name: signup.user.name, email: signup.user.email, token: signup.token, isDemo: true })
+      navigate({ to: '/onboarding/location' })
     }
 
-    navigate({ to: '/onboarding/location' })
+    
   }
 
   return (
@@ -36,7 +40,6 @@ export default function LandingPage() {
         <div className="ww-footprint-copy">
           <h1>Small shifts.<br />Big impact.</h1>
           <p>Schedule flexible energy use at cleaner, cheaper times — for your wallet and the planet.</p>
-          <Link to="/week" className="ww-sample-link">Explore a sample week <ArrowRight size={14} /></Link>
         </div>
       </aside>
       <section className="ww-welcome-copy">
