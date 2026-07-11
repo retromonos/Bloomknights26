@@ -53,7 +53,7 @@ export default async function loadCounties() {
                     // countyId: county.id
                 }));
 
-                const filteredUtils = utilitiesToCreate.filter((utility) => utilityJson.utilities.includes(utility.name))
+                const filteredUtils = utilitiesToCreate.filter((utility) => utilityJson.utilities.find((v)=>v.name === utility.name))
 
                 console.log(`Utilities to create for county ${county.name}:`, filteredUtils);
 
@@ -82,6 +82,34 @@ export default async function loadCounties() {
                     console.error(`Error loading utilities for county ${county.name}:`, error);
                 });
             }
+        })
+    }
+
+    const utilityRates = await prisma.utilityRate.findMany()
+
+    if(utilityRates.length === 0) {
+        utilityJson.utilities.forEach((u) => {
+            u.rates.forEach(async (r) => {
+
+                const utility = await prisma.utility.findFirst({
+                    where: {
+                        name: u.name
+                    }
+                })
+
+                if(!utility) return
+                
+                await prisma.utilityRate.create({
+                    data: {
+                        utilityId: utility?.id,
+                        startTime: r.start,
+                        endTime: r.end,
+                        name: r.name,
+                        rate: r.rate
+                    }
+                })
+
+            })
         })
     }
 }
