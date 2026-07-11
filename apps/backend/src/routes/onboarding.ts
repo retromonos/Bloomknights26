@@ -1,16 +1,7 @@
-import { readFileSync } from "node:fs";
 import {auth, prisma} from "../app";
 
 import type { Request, Response } from "express";
 import type { OnboardRequest, ScheduleRequest } from "@bloomknights/types"
-
-import { fileURLToPath } from 'url';
-import path from 'path';
-import { util } from "better-auth";
-import { count } from "node:console";
-
-import utilityJson from "../util/utility_companies.json"
-
 
 export async function handleOnboardRequest(req: Request, res: Response) {
     const body = req.body as OnboardRequest;
