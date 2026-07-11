@@ -98,7 +98,7 @@ model CountyInstance {
 
 model Utility {
   id               String            @id @default(cuid())
-  name             String
+  name             String            @unique
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   countyUtilities  CountyUtility[]
@@ -109,7 +109,6 @@ model Utility {
 
 model CountyUtility {
   id        String   @id @default(cuid())
-  name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   utilityId String
