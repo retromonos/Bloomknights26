@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { ArrowRight, Lock } from 'lucide-react'
 import Brand from '../components/Brand.jsx'
 import { useWattWhen } from '../lib/WattWhenContext.jsx'
+import handleSignup from '#/lib/auth.js'
 
 export default function LandingPage() {
   const navigate = useNavigate()
@@ -13,7 +14,11 @@ export default function LandingPage() {
   const submit = async (event) => {
     event.preventDefault()
     setStatus({ loading: true, error: '' })
-    await new Promise((resolve) => setTimeout(resolve, 350))
+
+    const acc = { name: form.name.trim(), email: form.email.trim(), password: form.password.trim()}
+    
+    await handleSignup(...acc)
+
     update('account', { name: form.name.trim(), email: form.email.trim(), isDemo: true })
     navigate({ to: '/onboarding/location' })
   }
@@ -43,7 +48,6 @@ export default function LandingPage() {
               <button disabled={status.loading} type="submit" className="ww-button ww-button-primary">
                 {status.loading ? 'Creating account…' : <>Create account <ArrowRight size={16} /></>}
               </button>
-              <small><Lock size={11} /> Demo account only. Your password is not sent or stored anywhere.</small>
             </form>
           </div>
         </div>
