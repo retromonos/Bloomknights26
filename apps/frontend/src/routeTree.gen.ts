@@ -9,38 +9,222 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WeekRouteImport } from './routes/week'
+import { Route as TasksRouteImport } from './routes/tasks'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SavingsRouteImport } from './routes/savings'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as ImpactRouteImport } from './routes/impact'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as OnboardingPreferencesRouteImport } from './routes/onboarding/preferences'
+import { Route as OnboardingLocationRouteImport } from './routes/onboarding/location'
+import { Route as OnboardingGenerateRouteImport } from './routes/onboarding/generate'
+import { Route as OnboardingAvailabilityRouteImport } from './routes/onboarding/availability'
+import { Route as OnboardingAppliancesRouteImport } from './routes/onboarding/appliances'
 
+const WeekRoute = WeekRouteImport.update({
+  id: '/week',
+  path: '/week',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SavingsRoute = SavingsRouteImport.update({
+  id: '/savings',
+  path: '/savings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImpactRoute = ImpactRouteImport.update({
+  id: '/impact',
+  path: '/impact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OnboardingPreferencesRoute = OnboardingPreferencesRouteImport.update({
+  id: '/preferences',
+  path: '/preferences',
+  getParentRoute: () => OnboardingRoute,
+} as any)
+const OnboardingLocationRoute = OnboardingLocationRouteImport.update({
+  id: '/location',
+  path: '/location',
+  getParentRoute: () => OnboardingRoute,
+} as any)
+const OnboardingGenerateRoute = OnboardingGenerateRouteImport.update({
+  id: '/generate',
+  path: '/generate',
+  getParentRoute: () => OnboardingRoute,
+} as any)
+const OnboardingAvailabilityRoute = OnboardingAvailabilityRouteImport.update({
+  id: '/availability',
+  path: '/availability',
+  getParentRoute: () => OnboardingRoute,
+} as any)
+const OnboardingAppliancesRoute = OnboardingAppliancesRouteImport.update({
+  id: '/appliances',
+  path: '/appliances',
+  getParentRoute: () => OnboardingRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/impact': typeof ImpactRoute
+  '/onboarding': typeof OnboardingRouteWithChildren
+  '/savings': typeof SavingsRoute
+  '/settings': typeof SettingsRoute
+  '/tasks': typeof TasksRoute
+  '/week': typeof WeekRoute
+  '/onboarding/appliances': typeof OnboardingAppliancesRoute
+  '/onboarding/availability': typeof OnboardingAvailabilityRoute
+  '/onboarding/generate': typeof OnboardingGenerateRoute
+  '/onboarding/location': typeof OnboardingLocationRoute
+  '/onboarding/preferences': typeof OnboardingPreferencesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/impact': typeof ImpactRoute
+  '/onboarding': typeof OnboardingRouteWithChildren
+  '/savings': typeof SavingsRoute
+  '/settings': typeof SettingsRoute
+  '/tasks': typeof TasksRoute
+  '/week': typeof WeekRoute
+  '/onboarding/appliances': typeof OnboardingAppliancesRoute
+  '/onboarding/availability': typeof OnboardingAvailabilityRoute
+  '/onboarding/generate': typeof OnboardingGenerateRoute
+  '/onboarding/location': typeof OnboardingLocationRoute
+  '/onboarding/preferences': typeof OnboardingPreferencesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/impact': typeof ImpactRoute
+  '/onboarding': typeof OnboardingRouteWithChildren
+  '/savings': typeof SavingsRoute
+  '/settings': typeof SettingsRoute
+  '/tasks': typeof TasksRoute
+  '/week': typeof WeekRoute
+  '/onboarding/appliances': typeof OnboardingAppliancesRoute
+  '/onboarding/availability': typeof OnboardingAvailabilityRoute
+  '/onboarding/generate': typeof OnboardingGenerateRoute
+  '/onboarding/location': typeof OnboardingLocationRoute
+  '/onboarding/preferences': typeof OnboardingPreferencesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/impact'
+    | '/onboarding'
+    | '/savings'
+    | '/settings'
+    | '/tasks'
+    | '/week'
+    | '/onboarding/appliances'
+    | '/onboarding/availability'
+    | '/onboarding/generate'
+    | '/onboarding/location'
+    | '/onboarding/preferences'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/impact'
+    | '/onboarding'
+    | '/savings'
+    | '/settings'
+    | '/tasks'
+    | '/week'
+    | '/onboarding/appliances'
+    | '/onboarding/availability'
+    | '/onboarding/generate'
+    | '/onboarding/location'
+    | '/onboarding/preferences'
+  id:
+    | '__root__'
+    | '/'
+    | '/impact'
+    | '/onboarding'
+    | '/savings'
+    | '/settings'
+    | '/tasks'
+    | '/week'
+    | '/onboarding/appliances'
+    | '/onboarding/availability'
+    | '/onboarding/generate'
+    | '/onboarding/location'
+    | '/onboarding/preferences'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ImpactRoute: typeof ImpactRoute
+  OnboardingRoute: typeof OnboardingRouteWithChildren
+  SavingsRoute: typeof SavingsRoute
+  SettingsRoute: typeof SettingsRoute
+  TasksRoute: typeof TasksRoute
+  WeekRoute: typeof WeekRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/week': {
+      id: '/week'
+      path: '/week'
+      fullPath: '/week'
+      preLoaderRoute: typeof WeekRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/savings': {
+      id: '/savings'
+      path: '/savings'
+      fullPath: '/savings'
+      preLoaderRoute: typeof SavingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/impact': {
+      id: '/impact'
+      path: '/impact'
+      fullPath: '/impact'
+      preLoaderRoute: typeof ImpactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +232,72 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/onboarding/preferences': {
+      id: '/onboarding/preferences'
+      path: '/preferences'
+      fullPath: '/onboarding/preferences'
+      preLoaderRoute: typeof OnboardingPreferencesRouteImport
+      parentRoute: typeof OnboardingRoute
+    }
+    '/onboarding/location': {
+      id: '/onboarding/location'
+      path: '/location'
+      fullPath: '/onboarding/location'
+      preLoaderRoute: typeof OnboardingLocationRouteImport
+      parentRoute: typeof OnboardingRoute
+    }
+    '/onboarding/generate': {
+      id: '/onboarding/generate'
+      path: '/generate'
+      fullPath: '/onboarding/generate'
+      preLoaderRoute: typeof OnboardingGenerateRouteImport
+      parentRoute: typeof OnboardingRoute
+    }
+    '/onboarding/availability': {
+      id: '/onboarding/availability'
+      path: '/availability'
+      fullPath: '/onboarding/availability'
+      preLoaderRoute: typeof OnboardingAvailabilityRouteImport
+      parentRoute: typeof OnboardingRoute
+    }
+    '/onboarding/appliances': {
+      id: '/onboarding/appliances'
+      path: '/appliances'
+      fullPath: '/onboarding/appliances'
+      preLoaderRoute: typeof OnboardingAppliancesRouteImport
+      parentRoute: typeof OnboardingRoute
+    }
   }
 }
 
+interface OnboardingRouteChildren {
+  OnboardingAppliancesRoute: typeof OnboardingAppliancesRoute
+  OnboardingAvailabilityRoute: typeof OnboardingAvailabilityRoute
+  OnboardingGenerateRoute: typeof OnboardingGenerateRoute
+  OnboardingLocationRoute: typeof OnboardingLocationRoute
+  OnboardingPreferencesRoute: typeof OnboardingPreferencesRoute
+}
+
+const OnboardingRouteChildren: OnboardingRouteChildren = {
+  OnboardingAppliancesRoute: OnboardingAppliancesRoute,
+  OnboardingAvailabilityRoute: OnboardingAvailabilityRoute,
+  OnboardingGenerateRoute: OnboardingGenerateRoute,
+  OnboardingLocationRoute: OnboardingLocationRoute,
+  OnboardingPreferencesRoute: OnboardingPreferencesRoute,
+}
+
+const OnboardingRouteWithChildren = OnboardingRoute._addFileChildren(
+  OnboardingRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ImpactRoute: ImpactRoute,
+  OnboardingRoute: OnboardingRouteWithChildren,
+  SavingsRoute: SavingsRoute,
+  SettingsRoute: SettingsRoute,
+  TasksRoute: TasksRoute,
+  WeekRoute: WeekRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
