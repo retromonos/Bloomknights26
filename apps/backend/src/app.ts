@@ -7,6 +7,7 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 
 import loadCounties from "./routes/geo.js";
+import { handleSchedulerRequest } from "./routes/scheduler.js";
 
 import cors from "cors";
 const app = express();
@@ -35,6 +36,7 @@ export const auth = betterAuth({
 });
 
 app.all("/api/auth/*", toNodeHandler(auth));
+app.use("/api/schedule", handleSchedulerRequest);
 
 // error handler
 app.use(function (
