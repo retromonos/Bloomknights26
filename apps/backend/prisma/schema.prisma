@@ -87,7 +87,6 @@ model County {
 
 model CountyInstance {
   id        String   @id @default(cuid())
-  name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   countyId  String
@@ -136,6 +135,7 @@ model UtilityInstance {
 
 model Device {
   id       String   @id @default(cuid())
+  stockName String @default("")
   name     String
   powerDraw Float
   createdAt DateTime @default(now())
