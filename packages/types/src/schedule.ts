@@ -3,5 +3,5 @@ import type { TimeBlock } from "./timeBlock"
 
 export type ScheduleRequest = {
   devices: (DeviceRequest | CustomDeviceRequest)[]
-  timeBlocks: TimeBlock[]
+  timeBlocks: Omit<TimeBlock, "id" | "userId">[]
 }

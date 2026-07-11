@@ -24,6 +24,7 @@ model User {
   schedules        ScheduleItem[]
 
   @@map("user")
+  timeBlocks TimeBlock[]
 }
 
 model Session {
@@ -167,6 +168,8 @@ model TimeBlock {
   endTime        DateTime
   startDayOfWeek Int // 0 (Sunday) to 6 (Saturday)
   endDayOfWeek   Int // 0 (Sunday) to 6 (Saturday)
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
