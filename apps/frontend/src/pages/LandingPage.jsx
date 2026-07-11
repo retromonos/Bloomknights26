@@ -17,9 +17,11 @@ export default function LandingPage() {
 
     const acc = { name: form.name.trim(), email: form.email.trim(), password: form.password.trim()}
     
-    await handleSignup(...acc)
+    const signup = await handleSignup(acc.email, acc.password, acc.name)
 
-    update('account', { name: form.name.trim(), email: form.email.trim(), isDemo: true })
+    console.log(signup.user)
+
+    update('account', { name: signup.user.name, email: signup.user.email, token: signup.token, isDemo: true })
     navigate({ to: '/onboarding/location' })
   }
 
