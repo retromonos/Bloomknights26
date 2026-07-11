@@ -23,3 +23,9 @@ export default async function handleSignup(email: string, password: string, name
 
     return res.data
 }
+
+export async function handleSignin(email: string, password: string) {
+    const res = await authClient.signIn.email({email, password})
+
+    return res.data
+}

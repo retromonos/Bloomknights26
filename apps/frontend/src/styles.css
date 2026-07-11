@@ -41,7 +41,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .ww-welcome mark { padding: 0 .4rem .15rem; color: #000; background: var(--yellow); }
 .ww-welcome-inner > p { margin: 0 0 2rem; color: #444; font-size: .9rem; font-weight: 500; line-height: 1.65; }
 .ww-cta-stack { display: grid; gap: .8rem; }
-.ww-button { display: flex; align-items: center; justify-content: center; gap: .5rem; min-height: 48px; padding: .75rem 1.25rem; border: 2px solid #000; color: #000; background: #fff; box-shadow: var(--hard-shadow); font-size: .9rem; font-weight: 800; }
+.ww-button { display: flex; align-items: center; justify-content: center; gap: .5rem; min-height: 48px; padding: .75rem 1.25rem; border: 2px solid #000; color: #000; background: #fff; box-shadow: var(--hard-shadow); font-size: .9rem; font-weight: 800; cursor: pointer;}
 .ww-button-primary { background: var(--lagoon); }
 .ww-button:hover { color: #000; transform: translate(-1px, -1px); box-shadow: 5px 5px 0 #000; }
 .ww-button:active { transform: translate(3px, 3px); box-shadow: none; }
