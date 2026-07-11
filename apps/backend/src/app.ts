@@ -1,23 +1,16 @@
-import express = require("express");
-
-var createError = require("http-errors");
-var path = require("path");
-var cookieParser = require("cookie-parser");
-var logger = require("morgan");
-
-var usersRouter = require("./routes/users");
-
+import express from "express";
+import path from "path";
+// import cookieParser from "cookie-parser";
+import createHttpError from "http-errors";
+import usersRouter from "./routes/users.js";
 var app = express();
 
 const port = process.env.PORT || 3001;
 
 // view engine setup
-app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "public")));
-
+// app.use(cookieParser());
 app.use("/api/users", usersRouter);
 
 // catch 404 and forward to error handler
@@ -26,7 +19,7 @@ app.use(function (
   res: express.Response,
   next: express.NextFunction,
 ) {
-  next(createError(404));
+  next(createHttpError(404));
 });
 
 // error handler
