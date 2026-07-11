@@ -2,6 +2,7 @@ export type Device = {
   id?: string;
   name: string;
   powerDraw: number;
+  stockName: string;
 }
 
 export type DeviceInstance = {
@@ -14,13 +15,19 @@ export type DeviceInstance = {
 
 export type PopulatedDeviceInstance =
   Omit<DeviceInstance, "deviceId"> & {
-    device: Device | null;
+    device: Device;
   };
 
 export type DeviceRequest = {
-  deviceId: string;
   stockName: string;
   frequency: number;
   duration: number;
-  name: string;
+  isCustom: false;
+}
+
+export type CustomDeviceRequest = {
+  deviceId: string;
+  frequency: number;
+  duration: number;
+  isCustom: true;
 }

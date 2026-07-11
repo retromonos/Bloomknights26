@@ -19,7 +19,11 @@ export async function getDeviceById(id: string): Promise<Device | null> {
 }
 
 export async function populateDeviceInstance(deviceInstance: DeviceInstance): Promise<PopulatedDeviceInstance> {
-    const device = await getDeviceById(deviceInstance.id);
+    const device = await getDeviceById(deviceInstance.deviceId);
+
+    if (!device) {
+      throw new Error(`Device with ID ${deviceInstance.deviceId} not found`);
+    }
 
     return {
       id: deviceInstance.id,
@@ -63,5 +67,23 @@ export async function createDeviceInstance(deviceInstance: Omit<DeviceInstance, 
         frequency: result.frequency,
         duration: result.duration,
         userId: result.userId,
+    }
+}
+
+export async function getDeviceByStockName(stockName: string): Promise<Device | null> {
+    const result = await prisma.device.findFirst({
+        where: {
+            stockName: stockName,
+        }
+    });
+
+
+    if (!result) return null;
+
+    return {
+        id: result.id,
+        powerDraw: result.powerDraw,
+        stockName: result.stockName,
+        name: result.name,
     }
 }
