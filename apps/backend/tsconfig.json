@@ -1,11 +1,11 @@
 {
   "include": [
     "src/*"
-  ],
+, "generated", "prisma.config.ts"  ],
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
     // File Layout
-    "rootDir": "./src",
+    "rootDir": ".",
     "outDir": "./dist",
 
     "module": "ESNext",
