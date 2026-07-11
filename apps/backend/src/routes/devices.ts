@@ -60,161 +60,178 @@ export function populateDevices() {
 }
 
 export async function createDevice(req: Request, res: Response) {
+    try {
+        const session = await auth.api.getSession({
+            headers: req.headers as any
+        });
 
-    const session = await auth.api.getSession({
-        headers: req.headers as any
-    });
-
-    if(!session) {
-        res.status(401).json({ message: "Unauthorized" });
-        return
-    }
-
-    const data = req.body as Device
-
-    res.json(await prisma.device.create({
-        data: {
-            name: data.name,
-            powerDraw: data.powerDraw,
-            isCustom: true
+        if(!session) {
+            res.status(401).json({ message: "Unauthorized" });
+            return
         }
-    }));
+
+        const data = req.body as Device
+
+        res.json(await prisma.device.create({
+            data: {
+                name: data.name,
+                powerDraw: data.powerDraw,
+            }
+        }));
+    } catch (err: any) {
+        res.status(err.status || 500).json({ message: "An error occurred", error: err.message });
+    }
 }
 
 export async function getDevices(req: Request, res: Response) {
+    try {
+        const session = await auth.api.getSession({
+            headers: req.headers as any
+        });
 
-    const session = await auth.api.getSession({
-        headers: req.headers as any
-    });
+        if(!session) {
+            res.status(401).json({ message: "Unauthorized" });
+            return
+        }
 
-    if(!session) {
-        res.status(401).json({ message: "Unauthorized" });
-        return
+        const devices = await prisma.device.findMany();
+
+        res.json(devices);
+    } catch (err: any) {
+        res.status(err.status || 500).json({ message: "An error occurred", error: err.message });
     }
-
-    const devices = await prisma.device.findMany();
-
-    res.json(devices);
 }
 
 export async function getDeviceInstances(req: Request, res: Response) {
+    try {
+        const session = await auth.api.getSession({
+            headers: req.headers as any
+        });
 
-    const session = await auth.api.getSession({
-        headers: req.headers as any
-    });
-
-    if(!session) {
-        res.status(401).json({ message: "Unauthorized" });
-        return
-    }
-
-    const deviceInstances = await prisma.deviceInstance.findMany({
-        where: {
-            userId: session.user.id
-        },
-        include: {
-            device: true
+        if(!session) {
+            res.status(401).json({ message: "Unauthorized" });
+            return
         }
-    });
 
-    res.json(deviceInstances);
+        const deviceInstances = await prisma.deviceInstance.findMany({
+            where: {
+                userId: session.user.id
+            },
+            include: {
+                device: true
+            }
+        });
+
+        res.json(deviceInstances);
+    } catch (err: any) {
+        res.status(err.status || 500).json({ message: "An error occurred", error: err.message });
+    }
 }
 
 export async function createDeviceInstance(req: Request, res: Response) {
+    try {
+        const session = await auth.api.getSession({
+            headers: req.headers as any
+        });
 
-    const session = await auth.api.getSession({
-        headers: req.headers as any
-    });
-
-    if(!session) {
-        res.status(401).json({ message: "Unauthorized" });
-        return
-    }
-
-    const data = req.body as any
-
-    res.json(await prisma.deviceInstance.create({
-        data: {
-            deviceId: data.deviceId,
-            frequency: data.frequency,
-            duration: data.duration,
-            userId: session.user.id
+        if(!session) {
+            res.status(401).json({ message: "Unauthorized" });
+            return
         }
-    }));
+
+        const data = req.body as any
+
+        res.json(await prisma.deviceInstance.create({
+            data: {
+                deviceId: data.deviceId,
+                frequency: data.frequency,
+                duration: data.duration,
+                userId: session.user.id
+            }
+        }));
+    } catch (err: any) {
+        res.status(err.status || 500).json({ message: "An error occurred", error: err.message });
+    }
 }
 
 export async function deleteDeviceInstance(req: Request, res: Response) {
+    try {
+        const session = await auth.api.getSession({
+            headers: req.headers as any
+        });
 
-    const session = await auth.api.getSession({
-        headers: req.headers as any
-    });
-
-    if(!session) {
-        res.status(401).json({ message: "Unauthorized" });
-        return
-    }
-
-    const data = req.body as any
-
-    const deviceInstance = await prisma.deviceInstance.findUnique({
-        where: {
-            id: data.id
+        if(!session) {
+            res.status(401).json({ message: "Unauthorized" });
+            return
         }
-    });
 
-    if(!deviceInstance) {
-        res.status(404).json({ message: "Device instance not found" });
-        return
-    }
+        const data = req.body as any
 
-    if(deviceInstance.userId !== session.user.id) {
-        res.status(403).json({ message: "Forbidden" });
-        return
-    }
+        const deviceInstance = await prisma.deviceInstance.findUnique({
+            where: {
+                id: data.id
+            }
+        });
 
-    res.json(await prisma.deviceInstance.delete({
-        where: {
-            id: data.id
+        if(!deviceInstance) {
+            res.status(404).json({ message: "Device instance not found" });
+            return
         }
-    }));
+
+        if(deviceInstance.userId !== session.user.id) {
+            res.status(403).json({ message: "Forbidden" });
+            return
+        }
+
+        res.json(await prisma.deviceInstance.delete({
+            where: {
+                id: data.id
+            }
+        }));
+    } catch (err: any) {
+        res.status(err.status || 500).json({ message: "An error occurred", error: err.message });
+    }
 }
 
 export async function updateDeviceInstance(req: Request, res: Response) {
+    try {
+        const session = await auth.api.getSession({
+            headers: req.headers as any
+        });
 
-    const session = await auth.api.getSession({
-        headers: req.headers as any
-    });
-
-    if(!session) {
-        res.status(401).json({ message: "Unauthorized" });
-        return
-    }
-
-    const data = req.body as any
-
-    const deviceInstance = await prisma.deviceInstance.findUnique({
-        where: {
-            id: data.id
+        if(!session) {
+            res.status(401).json({ message: "Unauthorized" });
+            return
         }
-    });
 
-    if(!deviceInstance) {
-        res.status(404).json({ message: "Device instance not found" });
-        return
-    }
+        const data = req.body as any
 
-    if(deviceInstance.userId !== session.user.id) {
-        res.status(403).json({ message: "Forbidden" });
-        return
-    }
+        const deviceInstance = await prisma.deviceInstance.findUnique({
+            where: {
+                id: data.id
+            }
+        });
 
-    res.json(await prisma.deviceInstance.update({
-        where: {
-            id: data.id
-        },
-        data: {
-            frequency: data.frequency,
-            duration: data.duration
+        if(!deviceInstance) {
+            res.status(404).json({ message: "Device instance not found" });
+            return
         }
-    }));
+
+        if(deviceInstance.userId !== session.user.id) {
+            res.status(403).json({ message: "Forbidden" });
+            return
+        }
+
+        res.json(await prisma.deviceInstance.update({
+            where: {
+                id: data.id
+            },
+            data: {
+                frequency: data.frequency,
+                duration: data.duration
+            }
+        }));
+    } catch (err: any) {
+        res.status(err.status || 500).json({ message: "An error occurred", error: err.message });
+    }
 }
