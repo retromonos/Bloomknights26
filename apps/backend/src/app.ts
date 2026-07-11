@@ -9,11 +9,12 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import loadCounties, { requestCountyFromZip } from "./routes/geo.js";
 import { createDevice, createDeviceInstance, deleteDeviceInstance, getDeviceInstances, getDevices, populateDevices, updateDeviceInstance } from "./routes/devices.js";
 import { handleSchedulerRequest } from "./routes/scheduler.js";
-import { handleOnboardRequest } from "./routes/onboarding.js";
+import { GetUtilitiesByCounty, handleOnboardRequest } from "./routes/onboarding.js";
 
 import "dotenv/config";
 
 import cors from "cors";
+import { bearer } from "better-auth/plugins";
 const app = express();
 
 const port = process.env.PORT || 3001;
@@ -34,6 +35,9 @@ export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3001/",
   emailAndPassword: { enabled: true },
   trustedOrigins: ["http://localhost:3000"],
+  plugins: [
+    bearer()
+  ],
   database: prismaAdapter(prisma, {
     provider: "postgresql"
   }),
@@ -49,6 +53,7 @@ app.use("/api/device/instance", getDeviceInstances)
 app.use("/api/device/instance/create", createDeviceInstance)
 app.use("/api/device/instance/delete", deleteDeviceInstance)
 app.use("/api/device/instance/update", updateDeviceInstance)
+app.use("/api/utilities/byCounty", GetUtilitiesByCounty)
 
 // error handler
 app.use(function (

@@ -60,3 +60,51 @@ export async function handleOnboardRequest(req: Request, res: Response) {
 
     res.status(200).json({ message: "Onboarding successful" });
 }
+
+export async function GetUtilitiesByCounty(req: Request, res: Response) {
+    const session = await auth.api.getSession({
+        headers: req.headers as any
+    });
+
+    if(!session) {
+        res.status(401).json({ message: "Unauthorized" });
+        return
+    }
+
+    const body = req.body as {county: string}
+
+    const county = await prisma.county.findFirst({
+        where: {
+            name: body.county
+        }
+    })
+
+    if(!county) {
+        res.status(404).json({message: "County not found"})
+        return
+    }
+
+    console.log("body:", body.county)
+    console.log("county:", county.name)
+
+    const utilitiesA = await prisma.countyUtility.findMany({
+        where: {
+            county: county
+        }
+    })
+
+    const list = []
+
+    for(let i = 0; i < utilitiesA.length; i++) {
+        const u = utilitiesA.at(i)
+        if(!u) continue
+
+        list.push(await prisma.utility.findUnique({
+            where: {
+                id: u.utilityId
+            }
+        }))
+    }
+
+    res.status(200).json({utilities: list})
+}

@@ -7,6 +7,7 @@ export default function LocationPage() {
   const firstName = state.account?.name?.trim().split(/\s+/)[0]
   const [zip, setZip] = useState(state.location?.zip || '')
   const [submitted, setSubmitted] = useState(Boolean(state.locationProvidersReady))
+  const [error, setError] = useState("")
   const canContinue = zip.length === 5
 
   const handleZipChange = (event) => {
@@ -20,10 +21,7 @@ export default function LocationPage() {
     event.preventDefault()
     if (!canContinue) return
     update('location', { ...state.location, zip })
-    update('locationProvidersReady', true)
-    setSubmitted(true)
-
-    console.log(state.account?.token)
+    setError(false)
 
     const countyRes = await fetch("http://localhost:3001/api/zip", {
       method: "POST",
@@ -37,6 +35,13 @@ export default function LocationPage() {
     })
 
     const resJson = await countyRes.json()
+    if(resJson && resJson.county) {
+      update('detectedCounty', resJson.county)
+      setSubmitted(true)
+      update('locationProvidersReady', true)
+    } else {
+      setError("Could not find your county. Please input a valid Florida ZIP code.")
+    }
     console.log(resJson.county)
   }
 
@@ -75,9 +80,11 @@ export default function LocationPage() {
           />
         </div>
         <small id="zip-help">Your ZIP is only used to identify your county and provider options.</small>
+        {error != "" && <div className='text-red-700'>{error}</div>}
         <button type="submit" disabled={!canContinue} className="w-full bg-[var(--lagoon)] py-3 text-sm font-semibold disabled:opacity-40">
           Detect my county
         </button>
+        
       </form>
 
     </div>
