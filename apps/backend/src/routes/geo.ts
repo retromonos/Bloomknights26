@@ -113,6 +113,8 @@ export default async function loadCounties() {
             })
         })
     }
+
+    return
 }
 
 export async function requestCountyFromZip(req: Request, res: Response) {

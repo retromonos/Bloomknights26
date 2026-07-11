@@ -40,7 +40,7 @@ Madison
 Manatee
 Marion
 Martin
-MiamiDade
+Miami-Dade
 Monroe
 Nassau
 Okaloosa
@@ -55,8 +55,8 @@ Putnam
 SantaRosa
 Sarasota
 Seminole
-StJohns
-StLucie
+St. Johns
+St. Lucie
 Sumter
 Suwannee
 Taylor

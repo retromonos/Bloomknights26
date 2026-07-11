@@ -75,7 +75,11 @@ app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
 
-loadCounties()
-populateDevices()
+async function initialize() {
+  await loadCounties()
+  await populateDevices()
+}
+
+initialize()
 
 export default app;
