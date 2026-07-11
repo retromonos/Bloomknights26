@@ -118,33 +118,36 @@ export default async function loadCounties() {
 }
 
 export async function requestCountyFromZip(req: Request, res: Response) {
+    try {
+        console.log(req.headers)
 
-    console.log(req.headers)
+        const session = await auth.api.getSession({
+            headers: req.headers as any
+        });
 
-    const session = await auth.api.getSession({
-        headers: req.headers as any
-    });
+        if(!session) {
+            res.status(401).json({ message: "Unauthorized" });
+            return
+        }
 
-    if(!session) {
-        res.status(401).json({ message: "Unauthorized" });
-        return
+        const body = req.body as { zipCode: string };
+        const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${body.zipCode}&sensor=true&key=${process.env.GOOGLE_MAPS_API_KEY ?? ""}`);
+        const data:any = await response.json();
+
+        if(data.status !== "OK" || !data.results || data.results.length === 0) {
+            res.status(404).json({ message: "County not found" });
+            return
+        }
+
+        const countyComponent = data.results[0].address_components.find((component: any) => component.types.includes("administrative_area_level_2"));
+
+        if(!countyComponent) {
+            res.status(404).json({ message: "County not found" });
+            return
+        }
+
+        res.json({ county: countyComponent.long_name.replace(" County", "") });
+    } catch (err: any) {
+        res.status(err.status || 500).json({ message: "An error occurred", error: err.message });
     }
-
-    const body = req.body as { zipCode: string };
-    const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${body.zipCode}&sensor=true&key=${process.env.GOOGLE_MAPS_API_KEY ?? ""}`);
-    const data:any = await response.json();
-
-    if(data.status !== "OK" || !data.results || data.results.length === 0) {
-        res.status(404).json({ message: "County not found" });
-        return
-    }
-
-    const countyComponent = data.results[0].address_components.find((component: any) => component.types.includes("administrative_area_level_2"));
-
-    if(!countyComponent) {
-        res.status(404).json({ message: "County not found" });
-        return
-    }
-
-    res.json({ county: countyComponent.long_name.replace(" County", "") });
 }

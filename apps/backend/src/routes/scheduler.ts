@@ -7,66 +7,70 @@ import { getUtilityRatesForUser } from "../repository/utilityRepository";
 import { generateWeeklySchedule } from "../lib/scheduler";
 
 export async function handleSchedulerRequest(req: Request, res: Response) {
-    const body = req.body as ScheduleRequest;
-
-    const session = await auth.api.getSession({
-        headers: req.headers as Record<string, string>
-    });
-
-    if (!session) {
-        return res.status(401).json({ message: "User session not found"});
-    }
-
-    const nonCustomPromises: Promise<PopulatedDeviceInstance>[] = body.devices.filter(device => !device.isCustom).map(device => convertDeviceRequestToDeviceInstance(device, session.user.id));
-    // const nonCustomPromises: Promise<PopulatedDeviceInstance>[] = [];
-    // const customPromises: Promise<PopulatedDeviceInstance>[] = body.devices.filter(device => device.isCustom).map(device => convertCustomDeviceRequestToDeviceInstance(device, session.user.id));
-    const customPromises: Promise<PopulatedDeviceInstance>[] = [];
-
-
-    let powerItems: PowerItem[] = [];
-    let deviceNames: Record<string, string> = {};
     try {
-        const populatedDeviceInstances = await Promise.all([...nonCustomPromises, ...customPromises]);
-        powerItems = populatedDeviceInstances.map(convertPopulatedDeviceInstanceToPowerItem);
-        deviceNames = Object.fromEntries(
-            populatedDeviceInstances
-                .filter((d): d is PopulatedDeviceInstance & { device: { id: string } } => !!d.device.id)
-                .map((d) => [d.device.id!, d.device.name])
-        );
-    } catch (err) {
-        return res.status(500).json({ message: "Error processing device instances", err });
-    }
+        const body = req.body as ScheduleRequest;
 
-    let timeBlockPromises: Promise<TimeBlock | null>[] = [];
-    for (const timeBlock of body.timeBlocks) {
-        timeBlockPromises.push(createTimeBlock({ ...timeBlock, userId: session.user.id }));
-    }
+        const session = await auth.api.getSession({
+            headers: req.headers as Record<string, string>
+        });
 
-    const persistedTimeBlocks = await Promise.all(timeBlockPromises);
+        if (!session) {
+            return res.status(401).json({ message: "User session not found"});
+        }
 
-    const schedulerTimeBlocks = persistedTimeBlocks
-        .filter((tb): tb is TimeBlock => tb !== null)
-        .map((tb) => ({
-            ...tb,
+        const nonCustomPromises: Promise<PopulatedDeviceInstance>[] = body.devices.filter(device => !device.isCustom).map(device => convertDeviceRequestToDeviceInstance(device, session.user.id));
+        // const nonCustomPromises: Promise<PopulatedDeviceInstance>[] = [];
+        // const customPromises: Promise<PopulatedDeviceInstance>[] = body.devices.filter(device => device.isCustom).map(device => convertCustomDeviceRequestToDeviceInstance(device, session.user.id));
+        const customPromises: Promise<PopulatedDeviceInstance>[] = [];
+
+
+        let powerItems: PowerItem[] = [];
+        let deviceNames: Record<string, string> = {};
+        try {
+            const populatedDeviceInstances = await Promise.all([...nonCustomPromises, ...customPromises]);
+            powerItems = populatedDeviceInstances.map(convertPopulatedDeviceInstanceToPowerItem);
+            deviceNames = Object.fromEntries(
+                populatedDeviceInstances
+                    .filter((d): d is PopulatedDeviceInstance & { device: { id: string } } => !!d.device.id)
+                    .map((d) => [d.device.id!, d.device.name])
+            );
+        } catch (err) {
+            return res.status(500).json({ message: "Error processing device instances", err });
+        }
+
+        let timeBlockPromises: Promise<TimeBlock | null>[] = [];
+        for (const timeBlock of body.timeBlocks) {
+            timeBlockPromises.push(createTimeBlock({ ...timeBlock, userId: session.user.id }));
+        }
+
+        const persistedTimeBlocks = await Promise.all(timeBlockPromises);
+
+        const schedulerTimeBlocks = persistedTimeBlocks
+            .filter((tb): tb is TimeBlock => tb !== null)
+            .map((tb) => ({
+                ...tb,
+                userId: session.user.id,
+            }));
+
+        const utilityRates = await getUtilityRatesForUser(session.user.id);
+
+        const weeklySchedule = generateWeeklySchedule({
             userId: session.user.id,
-        }));
-
-    const utilityRates = await getUtilityRatesForUser(session.user.id);
-
-    const weeklySchedule = generateWeeklySchedule({
-        userId: session.user.id,
-        powerItems,
-        timeBlocks: schedulerTimeBlocks,
-        utilityRates,
-        strategy: { type: 'cost' },
-        options: { deviceNames },
-    });
+            powerItems,
+            timeBlocks: schedulerTimeBlocks,
+            utilityRates,
+            strategy: { type: 'cost' },
+            options: { deviceNames },
+        });
 
 
-    return res.json({
-        scheduleItems: weeklySchedule.scheduleItems,
-        warnings: weeklySchedule.warnings,
-    });
+        return res.json({
+            scheduleItems: weeklySchedule.scheduleItems,
+            warnings: weeklySchedule.warnings,
+        });
+    } catch (err: any) {
+        res.status(err.status || 500).json({ message: "An error occurred", error: err.message });
+    }
 }
 
 
