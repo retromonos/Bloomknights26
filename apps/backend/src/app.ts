@@ -25,6 +25,17 @@ app.use(cors({
   credentials: true,
 }))
 
+export const auth = betterAuth({
+  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3001/",
+  emailAndPassword: { enabled: true },
+  trustedOrigins: ["http://localhost:3000"],
+  database: prismaAdapter(prisma, {
+    provider: "postgresql"
+  }),
+});
+
+app.all("/api/auth/*", toNodeHandler(auth));
+
 // error handler
 app.use(function (
   err: any,
@@ -41,20 +52,9 @@ app.use(function (
   res.render("error");
 });
 
-export const auth = betterAuth({
-  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3001/",
-  emailAndPassword: { enabled: true },
-  trustedOrigins: ["http://localhost:3000"],
-  database: prismaAdapter(prisma, {
-    provider: "postgresql"
-  }),
-});
-
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
-
-app.all("/api/auth/*", toNodeHandler(auth));
 
 loadCounties()
 
