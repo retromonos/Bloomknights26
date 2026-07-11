@@ -9,12 +9,33 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+<<<<<<< Updated upstream
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+=======
+import { Route as WeekRouteImport } from './routes/week'
+import { Route as TasksRouteImport } from './routes/tasks'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SavingsRouteImport } from './routes/savings'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as ImpactRouteImport } from './routes/impact'
+import { Route as HomeRouteImport } from './routes/home'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as OnboardingPriorityRouteImport } from './routes/onboarding/priority'
+import { Route as OnboardingLocationRouteImport } from './routes/onboarding/location'
+import { Route as OnboardingGenerateRouteImport } from './routes/onboarding/generate'
+import { Route as OnboardingAvailabilityRouteImport } from './routes/onboarding/availability'
+import { Route as OnboardingAppliancesRouteImport } from './routes/onboarding/appliances'
+>>>>>>> Stashed changes
 
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeRoute = HomeRouteImport.update({
+  id: '/home',
+  path: '/home',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -22,6 +43,7 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+<<<<<<< Updated upstream
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -30,10 +52,68 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+=======
+const OnboardingPriorityRoute = OnboardingPriorityRouteImport.update({
+  id: '/priority',
+  path: '/priority',
+  getParentRoute: () => OnboardingRoute,
+} as any)
+const OnboardingLocationRoute = OnboardingLocationRouteImport.update({
+  id: '/location',
+  path: '/location',
+  getParentRoute: () => OnboardingRoute,
+} as any)
+const OnboardingGenerateRoute = OnboardingGenerateRouteImport.update({
+  id: '/generate',
+  path: '/generate',
+  getParentRoute: () => OnboardingRoute,
+} as any)
+const OnboardingAvailabilityRoute = OnboardingAvailabilityRouteImport.update({
+  id: '/availability',
+  path: '/availability',
+  getParentRoute: () => OnboardingRoute,
+} as any)
+const OnboardingAppliancesRoute = OnboardingAppliancesRouteImport.update({
+  id: '/appliances',
+  path: '/appliances',
+  getParentRoute: () => OnboardingRoute,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/home': typeof HomeRoute
+  '/impact': typeof ImpactRoute
+  '/onboarding': typeof OnboardingRouteWithChildren
+  '/savings': typeof SavingsRoute
+  '/settings': typeof SettingsRoute
+  '/tasks': typeof TasksRoute
+  '/week': typeof WeekRoute
+  '/onboarding/appliances': typeof OnboardingAppliancesRoute
+  '/onboarding/availability': typeof OnboardingAvailabilityRoute
+  '/onboarding/generate': typeof OnboardingGenerateRoute
+  '/onboarding/location': typeof OnboardingLocationRoute
+  '/onboarding/priority': typeof OnboardingPriorityRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/home': typeof HomeRoute
+  '/impact': typeof ImpactRoute
+  '/onboarding': typeof OnboardingRouteWithChildren
+  '/savings': typeof SavingsRoute
+  '/settings': typeof SettingsRoute
+  '/tasks': typeof TasksRoute
+  '/week': typeof WeekRoute
+  '/onboarding/appliances': typeof OnboardingAppliancesRoute
+  '/onboarding/availability': typeof OnboardingAvailabilityRoute
+  '/onboarding/generate': typeof OnboardingGenerateRoute
+  '/onboarding/location': typeof OnboardingLocationRoute
+  '/onboarding/priority': typeof OnboardingPriorityRoute
+>>>>>>> Stashed changes
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+<<<<<<< Updated upstream
   '/about': typeof AboutRoute
 }
 export interface FileRouteTypes {
@@ -42,11 +122,82 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to: '/' | '/about'
   id: '__root__' | '/' | '/about'
+=======
+  '/home': typeof HomeRoute
+  '/impact': typeof ImpactRoute
+  '/onboarding': typeof OnboardingRouteWithChildren
+  '/savings': typeof SavingsRoute
+  '/settings': typeof SettingsRoute
+  '/tasks': typeof TasksRoute
+  '/week': typeof WeekRoute
+  '/onboarding/appliances': typeof OnboardingAppliancesRoute
+  '/onboarding/availability': typeof OnboardingAvailabilityRoute
+  '/onboarding/generate': typeof OnboardingGenerateRoute
+  '/onboarding/location': typeof OnboardingLocationRoute
+  '/onboarding/priority': typeof OnboardingPriorityRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths:
+    | '/'
+    | '/home'
+    | '/impact'
+    | '/onboarding'
+    | '/savings'
+    | '/settings'
+    | '/tasks'
+    | '/week'
+    | '/onboarding/appliances'
+    | '/onboarding/availability'
+    | '/onboarding/generate'
+    | '/onboarding/location'
+    | '/onboarding/priority'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/'
+    | '/home'
+    | '/impact'
+    | '/onboarding'
+    | '/savings'
+    | '/settings'
+    | '/tasks'
+    | '/week'
+    | '/onboarding/appliances'
+    | '/onboarding/availability'
+    | '/onboarding/generate'
+    | '/onboarding/location'
+    | '/onboarding/priority'
+  id:
+    | '__root__'
+    | '/'
+    | '/home'
+    | '/impact'
+    | '/onboarding'
+    | '/savings'
+    | '/settings'
+    | '/tasks'
+    | '/week'
+    | '/onboarding/appliances'
+    | '/onboarding/availability'
+    | '/onboarding/generate'
+    | '/onboarding/location'
+    | '/onboarding/priority'
+>>>>>>> Stashed changes
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+<<<<<<< Updated upstream
   AboutRoute: typeof AboutRoute
+=======
+  HomeRoute: typeof HomeRoute
+  ImpactRoute: typeof ImpactRoute
+  OnboardingRoute: typeof OnboardingRouteWithChildren
+  SavingsRoute: typeof SavingsRoute
+  SettingsRoute: typeof SettingsRoute
+  TasksRoute: typeof TasksRoute
+  WeekRoute: typeof WeekRoute
+>>>>>>> Stashed changes
 }
 
 declare module '@tanstack/react-router' {
@@ -58,6 +209,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -65,12 +223,82 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+<<<<<<< Updated upstream
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+=======
+    '/onboarding/priority': {
+      id: '/onboarding/priority'
+      path: '/priority'
+      fullPath: '/onboarding/priority'
+      preLoaderRoute: typeof OnboardingPriorityRouteImport
+      parentRoute: typeof OnboardingRoute
+    }
+    '/onboarding/location': {
+      id: '/onboarding/location'
+      path: '/location'
+      fullPath: '/onboarding/location'
+      preLoaderRoute: typeof OnboardingLocationRouteImport
+      parentRoute: typeof OnboardingRoute
+    }
+    '/onboarding/generate': {
+      id: '/onboarding/generate'
+      path: '/generate'
+      fullPath: '/onboarding/generate'
+      preLoaderRoute: typeof OnboardingGenerateRouteImport
+      parentRoute: typeof OnboardingRoute
+    }
+    '/onboarding/availability': {
+      id: '/onboarding/availability'
+      path: '/availability'
+      fullPath: '/onboarding/availability'
+      preLoaderRoute: typeof OnboardingAvailabilityRouteImport
+      parentRoute: typeof OnboardingRoute
+    }
+    '/onboarding/appliances': {
+      id: '/onboarding/appliances'
+      path: '/appliances'
+      fullPath: '/onboarding/appliances'
+      preLoaderRoute: typeof OnboardingAppliancesRouteImport
+      parentRoute: typeof OnboardingRoute
+    }
+  }
+}
+
+interface OnboardingRouteChildren {
+  OnboardingAppliancesRoute: typeof OnboardingAppliancesRoute
+  OnboardingAvailabilityRoute: typeof OnboardingAvailabilityRoute
+  OnboardingGenerateRoute: typeof OnboardingGenerateRoute
+  OnboardingLocationRoute: typeof OnboardingLocationRoute
+  OnboardingPriorityRoute: typeof OnboardingPriorityRoute
+}
+
+const OnboardingRouteChildren: OnboardingRouteChildren = {
+  OnboardingAppliancesRoute: OnboardingAppliancesRoute,
+  OnboardingAvailabilityRoute: OnboardingAvailabilityRoute,
+  OnboardingGenerateRoute: OnboardingGenerateRoute,
+  OnboardingLocationRoute: OnboardingLocationRoute,
+  OnboardingPriorityRoute: OnboardingPriorityRoute,
+}
+
+const OnboardingRouteWithChildren = OnboardingRoute._addFileChildren(
+  OnboardingRouteChildren,
+)
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  HomeRoute: HomeRoute,
+  ImpactRoute: ImpactRoute,
+  OnboardingRoute: OnboardingRouteWithChildren,
+  SavingsRoute: SavingsRoute,
+  SettingsRoute: SettingsRoute,
+  TasksRoute: TasksRoute,
+  WeekRoute: WeekRoute,
+>>>>>>> Stashed changes
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

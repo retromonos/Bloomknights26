@@ -19,7 +19,11 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
+<<<<<<< Updated upstream
         title: 'TanStack Start Starter',
+=======
+        title: 'WattWhen — your energy, at a better time',
+>>>>>>> Stashed changes
       },
     ],
     links: [
