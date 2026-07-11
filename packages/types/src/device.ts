@@ -1,7 +1,7 @@
 export type Device = {
-  id: string;
+  id?: string;
   name: string;
-  draw: number;
+  powerDraw: number;
 }
 
 export type DeviceInstance = {

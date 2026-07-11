@@ -7,6 +7,7 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 
 import loadCounties from "./routes/geo.js";
+import { populateDevices } from "./routes/devices.js";
 import { handleSchedulerRequest } from "./routes/scheduler.js";
 import { handleOnboardRequest } from "./routes/onboarding.js";
 
@@ -61,5 +62,6 @@ app.listen(port, () => {
 });
 
 loadCounties()
+populateDevices()
 
 export default app;
