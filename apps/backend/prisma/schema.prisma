@@ -134,6 +134,7 @@ model UtilityInstance {
 
 model Device {
   id       String   @id @default(cuid())
+  stockName String @default("")
   name     String
   powerDraw Float
   createdAt DateTime @default(now())
