@@ -6,13 +6,15 @@ import usersRouter from "./routes/users.js";
 import { PrismaClient } from "../generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { toNodeHandler } from "better-auth/node";
-import { auth } from "./lib/auth";
+import { betterAuth } from "better-auth";
+import { prismaAdapter } from "better-auth/adapters/prisma";
 
-var app = express();
+import cors from "cors";
+const app = express();
 
 const port = process.env.PORT || 3001;
 export const prisma = new PrismaClient({
-  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
+  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL || "postgresql://postgres:example@localhost:5432/postgres" })
 });
 
 // view engine setup
@@ -20,15 +22,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 // app.use(cookieParser());
 app.use("/api/users", usersRouter);
-
-// catch 404 and forward to error handler
-app.use(function (
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction,
-) {
-  next(createHttpError(404));
-});
+app.use(cors({
+  origin: "http://localhost:3000",
+  credentials: true,
+}))
 
 // error handler
 app.use(function (
@@ -46,10 +43,19 @@ app.use(function (
   res.render("error");
 });
 
-app.all("/api/auth/*", toNodeHandler(auth));
+export const auth = betterAuth({
+  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3001/",
+  emailAndPassword: { enabled: true },
+  trustedOrigins: ["http://localhost:3000"],
+  database: prismaAdapter(prisma, {
+    provider: "postgresql"
+  }),
+});
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
+app.all("/api/auth/*", toNodeHandler(auth));
 
 export default app;
