@@ -1,8 +1,5 @@
 import express from "express";
-import path from "path";
 // import cookieParser from "cookie-parser";
-import createHttpError from "http-errors";
-import usersRouter from "./routes/users.js";
 import { PrismaClient } from "../generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { toNodeHandler } from "better-auth/node";
@@ -23,7 +20,6 @@ export const prisma = new PrismaClient({
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 // app.use(cookieParser());
-app.use("/api/users", usersRouter);
 app.use(cors({
   origin: "http://localhost:3000",
   credentials: true,
