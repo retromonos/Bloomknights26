@@ -22,7 +22,7 @@ export default function LandingPage() {
       const signin = await handleSignin(acc.email, acc.password, acc.name)
       if(signin) {
         update('account', { name: signin.user.name, email: signin.user.email, token: signin.token, isDemo: true })
-        navigate({to: "/week"})
+        navigate({to: "/home"})
       }
     } else {
       const signup = await handleSignup(acc.email, acc.password, acc.name)
