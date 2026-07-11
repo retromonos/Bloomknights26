@@ -139,6 +139,7 @@ model Device {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   deviceInstances DeviceInstance[]
+  isCustom Boolean @default(false)
 }
 
 model DeviceInstance {
