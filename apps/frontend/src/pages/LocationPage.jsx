@@ -16,12 +16,28 @@ export default function LocationPage() {
     update('locationProvidersReady', false)
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
     if (!canContinue) return
     update('location', { ...state.location, zip })
     update('locationProvidersReady', true)
     setSubmitted(true)
+
+    console.log(state.account?.token)
+
+    const countyRes = await fetch("http://localhost:3001/api/zip", {
+      method: "POST",
+      body: JSON.stringify({
+        zipCode: zip
+      }),
+      headers: {
+        'Authorization': `Bearer ${state.account?.token?.trim().split(/\s+/)[0]}`,
+        'Content-Type': 'application/json'
+      }
+    })
+
+    const resJson = await countyRes.json()
+    console.log(resJson.county)
   }
 
   return (

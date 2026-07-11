@@ -116,17 +116,16 @@ export default async function loadCounties() {
 
 export async function requestCountyFromZip(req: Request, res: Response) {
 
-    const session = await auth.api.getSession({
-        headers: req.headers as any
-    });
+    // const session = await auth.api.getSession({
+    //     headers: req.headers as any
+    // });
 
-    if(!session) {
-        res.status(401).json({ message: "Unauthorized" });
-        return
-    }
+    // if(!session) {
+    //     res.status(401).json({ message: "Unauthorized" });
+    //     return
+    // }
 
     const body = req.body as { zipCode: string };
-
     const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${body.zipCode}&sensor=true&key=${process.env.GOOGLE_MAPS_API_KEY ?? ""}`);
     const data:any = await response.json();
 
