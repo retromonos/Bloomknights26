@@ -9,6 +9,8 @@ import { toNodeHandler } from "better-auth/node";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 
+import loadCounties from "./routes/geo.js";
+
 import cors from "cors";
 const app = express();
 
@@ -57,5 +59,7 @@ app.listen(port, () => {
 });
 
 app.all("/api/auth/*", toNodeHandler(auth));
+
+loadCounties()
 
 export default app;
