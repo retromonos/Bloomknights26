@@ -1,6 +1,11 @@
 {
   "devDependencies": {
-    "turbo": "^2.10.4"
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.1.1",
+    "prettier": "3.9.5",
+    "tsx": "^4.23.0",
+    "turbo": "^2.10.4",
+    "typescript": "^6.0.3"
   },
   "devEngines": {
     "packageManager": {
@@ -11,5 +16,13 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "scripts": {
+    "format": "prettier . --write",
+    "format:check": "prettier . --check"
+  },
+  "dependencies": {
+    "better-auth": "^1.6.23",
+    "express": "^5.2.1"
+  }
 }
