@@ -1,15 +1,15 @@
-import express from 'express';
-import type { Request, Response, Application } from 'express';
+import express = require('express');
 
 var createError = require('http-errors');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
 var app = express();
+
+const port = process.env.PORT || 3001;
 
 // view engine setup
 app.use(logger('dev'));
@@ -26,7 +26,7 @@ app.use(function(req: express.Request, res: express.Response, next: express.Next
 });
 
 // error handler
-app.use(function(err: Error, req: Request, res: express.Response, next: express.NextFunction) {
+app.use(function(err: any, req: express.Request, res: express.Response, next: express.NextFunction) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
@@ -36,4 +36,8 @@ app.use(function(err: Error, req: Request, res: express.Response, next: express.
   res.render('error');
 });
 
-module.exports = app;
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
+
+export = app;
