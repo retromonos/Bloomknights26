@@ -1,4 +1,3 @@
-// 
 export type PowerItem = {
   deviceId: string
   frequency: number

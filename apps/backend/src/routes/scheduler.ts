@@ -1,7 +1,10 @@
 import type { Request, Response } from "express";
-import type { CustomDeviceRequest, DeviceInstance, DeviceRequest, PopulatedDeviceInstance, PowerItem, ScheduleRequest } from "@bloomknights/types"
+import type { CustomDeviceRequest, DeviceInstance, DeviceRequest, PopulatedDeviceInstance, PowerItem, ScheduleRequest, TimeBlock } from "@bloomknights/types"
 import { auth } from "../app";
-import { createDevice, createDeviceInstance, getDeviceByStockName, populateDeviceInstance } from "../repository/deviceRepository";
+import { createDeviceInstance, getDeviceByStockName, populateDeviceInstance } from "../repository/deviceRepository";
+import { createTimeBlock } from "../repository/timeBlockRepository";
+import { getUtilityRatesForUser } from "../repository/utilityRepository";
+import { generateWeeklySchedule } from "../lib/scheduler";
 
 export async function handleSchedulerRequest(req: Request, res: Response) {
     const body = req.body as ScheduleRequest;
@@ -21,16 +24,48 @@ export async function handleSchedulerRequest(req: Request, res: Response) {
 
 
     let powerItems: PowerItem[] = [];
+    let deviceNames: Record<string, string> = {};
     try {
         const populatedDeviceInstances = await Promise.all([...nonCustomPromises, ...customPromises]);
         powerItems = populatedDeviceInstances.map(convertPopulatedDeviceInstanceToPowerItem);
+        deviceNames = Object.fromEntries(
+            populatedDeviceInstances
+                .filter((d): d is PopulatedDeviceInstance & { device: { id: string } } => !!d.device.id)
+                .map((d) => [d.device.id!, d.device.name])
+        );
     } catch (err) {
         return res.status(500).json({ message: "Error processing device instances", err });
     }
 
+    let timeBlockPromises: Promise<TimeBlock | null>[] = [];
+    for (const timeBlock of body.timeBlocks) {
+        timeBlockPromises.push(createTimeBlock({ ...timeBlock, userId: session.user.id }));
+    }
+
+    const persistedTimeBlocks = await Promise.all(timeBlockPromises);
+
+    const schedulerTimeBlocks = persistedTimeBlocks
+        .filter((tb): tb is TimeBlock => tb !== null)
+        .map((tb) => ({
+            ...tb,
+            userId: session.user.id,
+        }));
+
+    const utilityRates = await getUtilityRatesForUser(session.user.id);
+
+    const weeklySchedule = generateWeeklySchedule({
+        userId: session.user.id,
+        powerItems,
+        timeBlocks: schedulerTimeBlocks,
+        utilityRates,
+        strategy: { type: 'cost' },
+        options: { deviceNames },
+    });
+
 
     return res.json({
-        powerItems: powerItems,
+        scheduleItems: weeklySchedule.scheduleItems,
+        warnings: weeklySchedule.warnings,
     });
 }
 
