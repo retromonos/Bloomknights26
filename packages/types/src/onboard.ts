@@ -1,5 +1,5 @@
-import { County } from "./county";
-import { Utility } from "./utility";
+import type { County } from "./county";
+import type { Utility } from "./utility";
 
 export type OnboardRequest = {
   county: County;

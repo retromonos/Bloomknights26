@@ -9,4 +9,18 @@ export type DeviceInstance = {
   deviceId: string;
   frequency: number;
   duration: number;
+  userId: string;
+}
+
+export type PopulatedDeviceInstance =
+  Omit<DeviceInstance, "deviceId"> & {
+    device: Device | null;
+  };
+
+export type DeviceRequest = {
+  deviceId: string;
+  stockName: string;
+  frequency: number;
+  duration: number;
+  name: string;
 }
