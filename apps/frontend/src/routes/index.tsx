@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { authClient } from '#/lib/auth'
+import handleSignup, { authClient } from '#/lib/auth'
 import { useState } from 'react'
 
 export const Route = createFileRoute('/')({ component: App })
@@ -10,22 +10,7 @@ function App() {
   const [name, setName] = useState('')
   const [password, setPassword] = useState('')
 
-  function handleSignup() {
-    authClient.signUp.email({email, password, name, callbackURL: "/"}, {
-      onRequest: (ctx) => {
-        console.log("Requesting signup with email and password...", ctx)
-        // show loading
-      },
-      onSuccess: (ctx) => {
-        console.log("Successfully signed up!", ctx)
-        // redirect to the dashboard or sign in page
-      },
-      onError: (ctx) => {
-        // display the error message
-        alert(ctx.error.message);
-      },
-    })
-  }
+  
 
   return (
     <main className="page-wrap px-4 pb-8 pt-14">
@@ -58,7 +43,7 @@ function App() {
             onChange={(e) => setName(e.target.value)}
           />
         </div>
-        <button type="button" onClick={handleSignup}>Sign Up</button>
+        <button type="button" className='cursor-pointer' onClick={() => handleSignup(email, password, name)}>Sign Up</button>
       </form>
     </main>
   )
