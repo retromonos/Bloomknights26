@@ -9,6 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+<<<<<<< Updated upstream
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as WeekRouteImport } from './routes/week'
 import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as SettingsRouteImport } from './routes/settings'
@@ -50,6 +52,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
 const ImpactRoute = ImpactRouteImport.update({
   id: '/impact',
   path: '/impact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeRoute = HomeRouteImport.update({
+  id: '/home',
+  path: '/home',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({

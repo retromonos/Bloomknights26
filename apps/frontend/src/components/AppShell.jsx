@@ -1,7 +1,9 @@
 import { Link } from '@tanstack/react-router'
-import { Calendar, ListChecks, BarChart3, PiggyBank, Settings } from 'lucide-react'
+import { House, Calendar, ListChecks, BarChart3, PiggyBank, Settings } from 'lucide-react'
+import { DuckMark } from './Brand.jsx'
 
 const navItems = [
+  { to: '/home', label: 'Home', icon: House },
   { to: '/week', label: 'Week', icon: Calendar },
   { to: '/tasks', label: 'Tasks', icon: ListChecks },
   { to: '/impact', label: 'Impact', icon: BarChart3 },
@@ -11,7 +13,7 @@ const navItems = [
 
 export default function AppShell({ children, announcement }) {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="ww-app-shell min-h-screen bg-white">
       {/* Skip-to-content */}
       <a
         href="#main-content"
@@ -27,10 +29,10 @@ export default function AppShell({ children, announcement }) {
 
       {/* Desktop side nav */}
       <nav
-        className="fixed left-0 top-0 hidden h-full w-[72px] flex-col items-center border-r border-[var(--line)] bg-white py-4 lg:flex"
+        className="fixed left-0 top-0 hidden h-full w-[82px] flex-col items-center border-r-2 border-black bg-white py-4 lg:flex"
         aria-label="Main navigation"
       >
-        <div className="mb-6 text-lg font-bold text-[var(--lagoon)]">WW</div>
+        <div className="mb-6"><DuckMark size={45} /></div>
         {navItems.map((item) => {
           const Icon = item.icon
           return (
@@ -59,7 +61,7 @@ export default function AppShell({ children, announcement }) {
       </header>
 
       {/* Main content */}
-      <main id="main-content" className="pb-20 lg:ml-[72px] lg:pb-0" tabIndex={-1}>
+      <main id="main-content" className="pb-20 lg:ml-[82px] lg:pb-0" tabIndex={-1}>
         {children}
       </main>
 

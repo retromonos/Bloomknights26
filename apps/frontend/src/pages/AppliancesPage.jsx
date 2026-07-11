@@ -1,5 +1,5 @@
 import { useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Check, Plus, ChevronRight, ChevronLeft, X } from 'lucide-react'
 import { useWattWhen } from '../lib/WattWhenContext.jsx'
 import { appliancePresets } from '../data/applianceData.js'
@@ -12,18 +12,25 @@ export default function AppliancesPage() {
   const [configs, setConfigs] = useState(state.applianceConfigs || {})
   const [showCustom, setShowCustom] = useState(false)
 
+  useEffect(() => {
+    setSelected(state.selectedAppliances || [])
+  }, [state.selectedAppliances])
+
   const toggleAppliance = (id) => {
-    setSelected((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id])
+    const next = selected.includes(id) ? selected.filter((x) => x !== id) : [...selected, id]
+    setSelected(next)
+    update('selectedAppliances', next)
   }
 
   const handleNext = () => {
     update('selectedAppliances', selected)
-    update('applianceConfigs', configs)
+    update('applianceConfigs', { ...(state.applianceConfigs || {}), ...configs })
     navigate({ to: '/onboarding/availability' })
   }
 
   const saveConfig = (id, cfg) => {
     setConfigs((prev) => ({ ...prev, [id]: cfg }))
+    update('applianceConfigs', { ...(state.applianceConfigs || {}), [id]: cfg })
     setEditing(null)
   }
 
@@ -31,36 +38,36 @@ export default function AppliancesPage() {
     <div className="mx-auto max-w-lg p-4">
       <div className="mb-2 flex items-center gap-2">
         <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--lagoon)] text-xs font-bold text-white">3</span>
-        <span className="text-xs font-medium text-[var(--sea-ink-soft)]">Step 3 of 5</span>
+        <span className="text-xs font-medium text-[var(--sea-ink-soft)]">Step 2 of 4</span>
       </div>
 
       <h1 className="mb-1 text-xl font-bold text-[var(--sea-ink)]">Select your appliances</h1>
       <p className="mb-5 text-sm text-[var(--sea-ink-soft)]">Choose the appliances you'd like us to schedule. You can customise details for each one.</p>
 
-      <div className="space-y-2">
+      <div className="ww-appliance-grid">
         {appliancePresets.map((ap) => {
           const isSelected = selected.includes(ap.id)
           return (
-            <div key={ap.id} className={`flex items-center gap-3 rounded-xl border p-3 transition-colors ${isSelected ? 'border-[var(--lagoon)] bg-[var(--foam)]' : 'border-[var(--line)]'}`}>
-              <input type="checkbox" id={`ap-${ap.id}`} checked={isSelected} onChange={() => toggleAppliance(ap.id)} className="h-4 w-4 accent-[var(--lagoon)]" />
-              <label htmlFor={`ap-${ap.id}`} className="flex flex-1 cursor-pointer items-center gap-3">
-                <span className="text-lg">{ap.icon}</span>
-                <div className="flex-1">
+            <div key={ap.id} className={`ww-appliance-card ${isSelected ? 'selected' : ''}`}>
+              <input type="checkbox" id={`ap-${ap.id}`} checked={isSelected} onChange={() => toggleAppliance(ap.id)} className="ww-appliance-check accent-[var(--lagoon)]" />
+              <label htmlFor={`ap-${ap.id}`} className="flex flex-1 cursor-pointer flex-col items-center text-center">
+                <span className="text-3xl">{ap.icon}</span>
+                <div className="mt-2 flex-1">
                   <p className="text-sm font-medium text-[var(--sea-ink)]">{ap.name}</p>
                   <p className="text-[11px] text-[var(--sea-ink-soft)]">{ap.estimatedKwh} kWh (placeholder) · {ap.frequency}</p>
                 </div>
               </label>
               {isSelected && (
-                <button onClick={() => setEditing(ap)} className="rounded-lg px-2 py-1 text-[11px] font-medium text-[var(--lagoon-deep)] hover:bg-[var(--sand)]">
+                <button onClick={() => setEditing(ap)} className="mt-2 px-2 py-1 text-[10px] font-bold uppercase text-[var(--lagoon-deep)]">
                   Edit
                 </button>
               )}
-              {isSelected && <Check size={16} className="text-[var(--lagoon)]" />}
+              {isSelected && <Check size={15} className="ww-card-checkmark" />}
             </div>
           )
         })}
 
-        <button onClick={() => setShowCustom(true)} className="flex w-full items-center justify-center gap-1 rounded-xl border border-dashed border-[var(--line)] p-3 text-sm text-[var(--sea-ink-soft)] hover:border-[var(--lagoon)] hover:text-[var(--lagoon)]">
+        <button onClick={() => setShowCustom(true)} className="ww-appliance-card ww-add-appliance flex items-center justify-center gap-1 text-sm text-[var(--sea-ink-soft)]">
           <Plus size={16} /> Add custom appliance
         </button>
       </div>
@@ -68,7 +75,7 @@ export default function AppliancesPage() {
       <p className="mt-3 text-xs text-[var(--sea-ink-soft)]">{selected.length} appliance{selected.length !== 1 ? 's' : ''} selected</p>
 
       <div className="mt-6 flex gap-2">
-        <button onClick={() => navigate({ to: '/onboarding/preferences' })} className="flex items-center gap-1 rounded-xl border border-[var(--line)] px-4 py-3 text-sm font-medium text-[var(--sea-ink)]">
+        <button onClick={() => navigate({ to: '/onboarding/location' })} className="flex items-center gap-1 rounded-xl border border-[var(--line)] px-4 py-3 text-sm font-medium text-[var(--sea-ink)]">
           <ChevronLeft size={16} /> Back
         </button>
         <button onClick={handleNext} disabled={selected.length === 0} className="flex flex-1 items-center justify-center gap-1 rounded-xl bg-[var(--lagoon)] py-3 text-sm font-semibold text-white disabled:opacity-40 hover:bg-[var(--lagoon-deep)]">
@@ -91,8 +98,12 @@ export default function AppliancesPage() {
               e.preventDefault()
               const fd = new FormData(e.target)
               const id = `custom-${Date.now()}`
-              setSelected((prev) => [...prev, id])
-              setConfigs((prev) => ({ ...prev, [id]: { name: fd.get('name'), estimatedKwh: Number(fd.get('kwh')), frequency: fd.get('freq'), duration: 60, flexibility: 'anytime', icon: '⚡' } }))
+              const customConfig = { name: fd.get('name'), estimatedKwh: Number(fd.get('kwh')), frequency: fd.get('freq'), duration: 60, flexibility: 'anytime', icon: '⚡' }
+              const nextSelected = [...selected, id]
+              setSelected(nextSelected)
+              setConfigs((prev) => ({ ...prev, [id]: customConfig }))
+              update('selectedAppliances', nextSelected)
+              update('applianceConfigs', { ...(state.applianceConfigs || {}), [id]: customConfig })
               setShowCustom(false)
             }} className="space-y-3">
               <input name="name" placeholder="Appliance name" required className="w-full rounded-lg border border-[var(--line)] px-3 py-2 text-sm" />

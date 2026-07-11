@@ -26,11 +26,9 @@ export const demandChartData = [
 export const applianceChartData = [
   { name: 'EV Charging', kwh: 9.6 },
   { name: 'Laundry', kwh: 7.2 },
-  { name: 'Pool Pump', kwh: 3.0 },
   { name: 'Dishwasher', kwh: 3.6 },
   { name: 'Cooking', kwh: 2.0 },
-  { name: 'Portable AC', kwh: 1.2 },
-  { name: 'Gaming PC', kwh: 0.5 },
+  { name: 'PC / Computer', kwh: 0.7 },
   { name: 'Charging', kwh: 0.1 },
 ]
 

@@ -3,34 +3,21 @@ import { useState } from 'react'
 import { ChevronRight, ChevronLeft, Plus, X } from 'lucide-react'
 import { useWattWhen } from '../lib/WattWhenContext.jsx'
 
-const toggleDefs = [
-  { key: 'avoidPeak', label: 'Avoid peak hours when possible' },
-  { key: 'preferRenewable', label: 'Prefer renewable-heavy time slots' },
-  { key: 'quietHours', label: 'Respect quiet hours' },
-  { key: 'weekendFlex', label: 'More flexible on weekends' },
-  { key: 'notifyBefore', label: 'Notify before running appliances' },
-  { key: 'autoAccept', label: 'Auto-accept schedule suggestions' },
-]
-
 export default function AvailabilityPage() {
   const { state, update } = useWattWhen()
   const navigate = useNavigate()
   const avail = state.availability || {}
 
-  const [sleepStart, setSleepStart] = useState(avail.sleepStart || '23:00')
-  const [sleepEnd, setSleepEnd] = useState(avail.sleepEnd || '07:00')
-  const [workStart, setWorkStart] = useState(avail.workStart || '09:00')
-  const [workEnd, setWorkEnd] = useState(avail.workEnd || '17:00')
-  const [quietStart, setQuietStart] = useState(avail.quietStart || '22:00')
-  const [quietEnd, setQuietEnd] = useState(avail.quietEnd || '08:00')
+  const [sleepStart, setSleepStart] = useState(avail.sleepStart || '')
+  const [sleepEnd, setSleepEnd] = useState(avail.sleepEnd || '')
+  const [workStart, setWorkStart] = useState(avail.workStart || '')
+  const [workEnd, setWorkEnd] = useState(avail.workEnd || '')
+  const [quietStart, setQuietStart] = useState(avail.quietStart || '')
+  const [quietEnd, setQuietEnd] = useState(avail.quietEnd || '')
   const [customBlocks, setCustomBlocks] = useState(avail.customBlocks || [])
-  const [toggles, setToggles] = useState(avail.toggles || {
-    avoidPeak: true, preferRenewable: true, quietHours: true,
-    weekendFlex: true, notifyBefore: true, autoAccept: false,
-  })
 
   const addBlock = () => {
-    setCustomBlocks((prev) => [...prev, { id: Date.now(), label: '', start: '12:00', end: '13:00' }])
+    setCustomBlocks((prev) => [...prev, { id: Date.now(), label: '', start: '', end: '' }])
   }
 
   const removeBlock = (id) => {
@@ -42,15 +29,16 @@ export default function AvailabilityPage() {
   }
 
   const handleNext = () => {
-    update('availability', { sleepStart, sleepEnd, workStart, workEnd, quietStart, quietEnd, customBlocks, toggles })
-    navigate({ to: '/onboarding/generate' })
+    update('availability', { ...avail, sleepStart, sleepEnd, workStart, workEnd, quietStart, quietEnd, customBlocks })
+    update('scheduleReady', true)
   }
+  const scheduleComplete = Boolean(sleepStart && sleepEnd && workStart && workEnd && quietStart && quietEnd)
 
   return (
     <div className="mx-auto max-w-md p-4">
       <div className="mb-2 flex items-center gap-2">
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--lagoon)] text-xs font-bold text-white">4</span>
-        <span className="text-xs font-medium text-[var(--sea-ink-soft)]">Step 4 of 5</span>
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--lagoon)] text-xs font-bold text-white">3</span>
+        <span className="text-xs font-medium text-[var(--sea-ink-soft)]">Step 3 of 4</span>
       </div>
 
       <h1 className="mb-1 text-xl font-bold text-[var(--sea-ink)]">When are you unavailable?</h1>
@@ -121,26 +109,14 @@ export default function AvailabilityPage() {
           </button>
         </section>
 
-        {/* Toggles */}
-        <section>
-          <h2 className="mb-2 text-sm font-semibold text-[var(--sea-ink)]">Preferences</h2>
-          <div className="space-y-2">
-            {toggleDefs.map((t) => (
-              <label key={t.key} className="flex items-center justify-between rounded-lg border border-[var(--line)] px-3 py-2">
-                <span className="text-sm text-[var(--sea-ink)]">{t.label}</span>
-                <input type="checkbox" checked={toggles[t.key] || false} onChange={(e) => setToggles({ ...toggles, [t.key]: e.target.checked })} className="h-4 w-4 accent-[var(--lagoon)]" />
-              </label>
-            ))}
-          </div>
-        </section>
       </div>
 
       <div className="mt-6 flex gap-2">
         <button onClick={() => navigate({ to: '/onboarding/appliances' })} className="flex items-center gap-1 rounded-xl border border-[var(--line)] px-4 py-3 text-sm font-medium text-[var(--sea-ink)]">
           <ChevronLeft size={16} /> Back
         </button>
-        <button onClick={handleNext} className="flex flex-1 items-center justify-center gap-1 rounded-xl bg-[var(--lagoon)] py-3 text-sm font-semibold text-white hover:bg-[var(--lagoon-deep)]">
-          Generate my plan <ChevronRight size={16} />
+        <button onClick={handleNext} disabled={!scheduleComplete} className="flex flex-1 items-center justify-center gap-1 rounded-xl bg-[var(--lagoon)] py-3 text-sm font-semibold text-white disabled:opacity-40 hover:bg-[var(--lagoon-deep)]">
+          Save basic schedule <ChevronRight size={16} />
         </button>
       </div>
     </div>

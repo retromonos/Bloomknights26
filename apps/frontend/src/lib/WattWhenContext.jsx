@@ -2,30 +2,36 @@ import { createContext, useContext, useState, useEffect } from 'react'
 
 const WattWhenContext = createContext(null)
 
-const STORAGE_KEY = 'wattwhen-state'
+const STORAGE_KEY = 'wattwhen-state-v5'
 
 const defaultState = {
+  account: null,
   onboardingComplete: false,
-  location: { address: '', city: '', stateCode: '', zip: '', housingType: 'house', householdSize: 2 },
-  provider: 'pge-tou',
-  preference: 'balanced',
-  convenienceSlider: 50,
+  location: { zip: '' },
+  locationProvidersReady: false,
+  detectedCounty: '',
+  provider: null,
+  providerSelection: null,
+  useGenericProviderEstimate: false,
+  preference: '',
+  convenienceSlider: null,
   selectedAppliances: [],
   applianceConfigs: {},
+  scheduleReady: false,
   availability: {
-    sleepStart: '23:00',
-    sleepEnd: '07:00',
-    workStart: '09:00',
-    workEnd: '17:00',
-    quietStart: '22:00',
-    quietEnd: '08:00',
+    sleepStart: '',
+    sleepEnd: '',
+    workStart: '',
+    workEnd: '',
+    quietStart: '',
+    quietEnd: '',
     customBlocks: [],
     toggles: {
-      avoidPeak: true,
-      preferRenewable: true,
-      quietHours: true,
-      weekendFlex: true,
-      notifyBefore: true,
+      avoidPeak: false,
+      preferRenewable: false,
+      quietHours: false,
+      weekendFlex: false,
+      notifyBefore: false,
       autoAccept: false,
     },
   },

@@ -9,24 +9,22 @@ const options = [
   { id: 'balanced', label: 'Balanced', desc: 'Optimise for both savings and sustainability', icon: Scale, color: 'text-[var(--lagoon)]' },
 ]
 
-export default function PreferencesPage() {
+export default function PriorityPage() {
   const { state, update } = useWattWhen()
   const navigate = useNavigate()
 
-  const [preference, setPreference] = useState(state.preference || 'balanced')
-  const [slider, setSlider] = useState(state.convenienceSlider ?? 50)
+  const [preference, setPreference] = useState(state.preference || '')
 
   const handleNext = () => {
     update('preference', preference)
-    update('convenienceSlider', slider)
-    navigate({ to: '/onboarding/appliances' })
+    navigate({ to: '/onboarding/generate' })
   }
 
   return (
     <div className="mx-auto max-w-md p-4">
       <div className="mb-2 flex items-center gap-2">
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--lagoon)] text-xs font-bold text-white">2</span>
-        <span className="text-xs font-medium text-[var(--sea-ink-soft)]">Step 2 of 5</span>
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--lagoon)] text-xs font-bold text-white">4</span>
+        <span className="text-xs font-medium text-[var(--sea-ink-soft)]">Step 4 of 4</span>
       </div>
 
       <h1 className="mb-1 text-xl font-bold text-[var(--sea-ink)]">What matters most?</h1>
@@ -55,20 +53,11 @@ export default function PreferencesPage() {
         })}
       </fieldset>
 
-      <div className="mt-6">
-        <label htmlFor="conv-slider" className="mb-2 block text-sm font-medium text-[var(--sea-ink)]">Convenience vs. sustainability</label>
-        <input id="conv-slider" type="range" min={0} max={100} value={slider} onChange={(e) => setSlider(Number(e.target.value))} className="w-full accent-[var(--lagoon)]" />
-        <div className="flex justify-between text-[11px] text-[var(--sea-ink-soft)]">
-          <span>Max convenience</span>
-          <span>Max sustainability</span>
-        </div>
-      </div>
-
       <div className="mt-6 flex gap-2">
-        <button onClick={() => navigate({ to: '/onboarding/location' })} className="flex items-center gap-1 rounded-xl border border-[var(--line)] px-4 py-3 text-sm font-medium text-[var(--sea-ink)]">
+        <button onClick={() => navigate({ to: '/onboarding/availability' })} className="flex items-center gap-1 rounded-xl border border-[var(--line)] px-4 py-3 text-sm font-medium text-[var(--sea-ink)]">
           <ChevronLeft size={16} /> Back
         </button>
-        <button onClick={handleNext} className="flex flex-1 items-center justify-center gap-1 rounded-xl bg-[var(--lagoon)] py-3 text-sm font-semibold text-white hover:bg-[var(--lagoon-deep)]">
+        <button onClick={handleNext} disabled={!preference} className="flex flex-1 items-center justify-center gap-1 rounded-xl bg-[var(--lagoon)] py-3 text-sm font-semibold text-white disabled:opacity-40 hover:bg-[var(--lagoon-deep)]">
           Continue <ChevronRight size={16} />
         </button>
       </div>

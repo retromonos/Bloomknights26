@@ -75,8 +75,8 @@ export default function GeneratePage() {
               <p className="text-[11px] text-[var(--sea-ink-soft)]">Timing score</p>
             </div>
           </div>
-          <button onClick={() => navigate({ to: '/week' })} className="flex w-full items-center justify-center gap-1 rounded-xl bg-[var(--lagoon)] py-3 text-sm font-semibold text-white hover:bg-[var(--lagoon-deep)]">
-            View my week
+          <button onClick={() => navigate({ to: '/home' })} className="flex w-full items-center justify-center gap-1 rounded-xl bg-[var(--lagoon)] py-3 text-sm font-semibold text-white hover:bg-[var(--lagoon-deep)]">
+            Open my dashboard
           </button>
         </div>
       )}
