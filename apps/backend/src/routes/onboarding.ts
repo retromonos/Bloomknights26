@@ -7,7 +7,7 @@ export async function handleOnboardRequest(req: Request, res: Response) {
     const body = req.body as OnboardRequest;
 
     const session = await auth.api.getSession({
-        headers: req.headers as HeadersInit
+        headers: req.headers as any
     });
 
     if(!session) {
