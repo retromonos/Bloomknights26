@@ -1,7 +1,7 @@
-import { DeviceInstance } from "./device"
-import { TimeBlock } from "./timeBlock"
+import type { CustomDeviceRequest, DeviceRequest } from "./device"
+import type { TimeBlock } from "./timeBlock"
 
 export type ScheduleRequest = {
-  devices: DeviceInstance[]
+  devices: (DeviceRequest | CustomDeviceRequest)[]
   timeBlocks: TimeBlock[]
 }
