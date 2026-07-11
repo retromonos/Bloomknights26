@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "prettier": "3.9.5",
     "turbo": "^2.10.4"
   },
   "devEngines": {
@@ -11,5 +12,9 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "scripts": {
+    "format": "prettier . --write",
+    "format:check": "prettier . --check"
+  }
 }
