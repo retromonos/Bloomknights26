@@ -29,9 +29,6 @@ export async function handleSchedulerRequest(req: Request, res: Response) {
 
 
 async function convertDeviceRequestToDeviceInstance(request: DeviceRequest, userId: string): Promise<PopulatedDeviceInstance> {
-    if (request.isCustom) {
-        throw new Error("Request is not a non-custom device request");
-    }
     
     const deviceInstance: DeviceInstance = await createDeviceInstance({
         deviceId: request.deviceId,

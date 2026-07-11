@@ -22,14 +22,5 @@ export type DeviceRequest = {
   stockName: string;
   frequency: number;
   duration: number;
-  isCustom: false;
   name: string;
-}
-
-export type CustomDeviceRequest = {
-  name: string;
-  frequency: number;
-  duration: number;
-  powerDraw: number;
-  isCustom: true;
 }
