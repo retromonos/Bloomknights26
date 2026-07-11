@@ -17,6 +17,7 @@
     "post-cta-init": "npx -y create-db@latest --user-agent tanstack/tsrouter"
   },
   "dependencies": {
+    "@googlemaps/js-api-loader": "^2.1.1",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-devtools": "latest",
     "@tanstack/react-router": "latest",
