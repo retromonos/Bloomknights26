@@ -23,6 +23,7 @@ model User {
   deviceInstances  DeviceInstance[]
 
   @@map("user")
+  schedules ScheduleItem[]
 }
 
 model Session {
@@ -140,6 +141,8 @@ model Device {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   deviceInstances DeviceInstance[]
+
+  scheduleItems ScheduleItem[]
 }
 
 model DeviceInstance {
@@ -164,4 +167,18 @@ model TimeBlock {
   endDayOfWeek    Int      // 0 (Sunday) to 6 (Saturday)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt  
+}
+
+model ScheduleItem {
+  id       String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dayOfWeek  Int      // 0 (Sunday) to 6 (Saturday)
+  startTime DateTime
+  endTime   DateTime
+  device Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  deviceId String
 }
