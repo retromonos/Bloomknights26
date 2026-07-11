@@ -1,5 +1,8 @@
 import { readFileSync } from "node:fs";
-import {prisma} from "../app";
+import {auth, prisma} from "../app";
+
+import type { Request, Response } from "express";
+import type { OnboardRequest, ScheduleRequest } from "@bloomknights/types"
 
 import { fileURLToPath } from 'url';
 import path from 'path';

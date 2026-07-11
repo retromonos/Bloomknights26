@@ -86,7 +86,6 @@ model County {
 
 model CountyInstance {
   id        String   @id @default(cuid())
-  name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   countyId  String
