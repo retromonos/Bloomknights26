@@ -1,13 +1,15 @@
 import express from "express";
-import path from "path";
 // import cookieParser from "cookie-parser";
-import createHttpError from "http-errors";
-import usersRouter from "./routes/users.js";
 import { PrismaClient } from "../generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { toNodeHandler } from "better-auth/node";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+
+import loadCounties, { requestCountyFromZip } from "./routes/geo.js";
+import { createDevice, createDeviceInstance, deleteDeviceInstance, getDeviceInstances, getDevices, populateDevices, updateDeviceInstance } from "./routes/devices.js";
+import { handleSchedulerRequest } from "./routes/scheduler.js";
+import { handleOnboardRequest } from "./routes/onboarding.js";
 
 import cors from "cors";
 const app = express();
@@ -21,11 +23,30 @@ export const prisma = new PrismaClient({
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 // app.use(cookieParser());
-app.use("/api/users", usersRouter);
 app.use(cors({
   origin: "http://localhost:3000",
   credentials: true,
 }))
+
+export const auth = betterAuth({
+  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3001/",
+  emailAndPassword: { enabled: true },
+  trustedOrigins: ["http://localhost:3000"],
+  database: prismaAdapter(prisma, {
+    provider: "postgresql"
+  }),
+});
+
+app.all("/api/auth/*", toNodeHandler(auth));
+app.use("/api/schedule", handleSchedulerRequest);
+app.use("/api/onboard", handleOnboardRequest);
+app.use("/api/zip", requestCountyFromZip)
+app.use("/api/device/create", createDevice)
+app.use("/api/device", getDevices)
+app.use("/api/device/instance", getDeviceInstances)
+app.use("/api/device/instance/create", createDeviceInstance)
+app.use("/api/device/instance/delete", deleteDeviceInstance)
+app.use("/api/device/instance/update", updateDeviceInstance)
 
 // error handler
 app.use(function (
@@ -40,22 +61,14 @@ app.use(function (
 
   // render the error page
   res.status(err.status || 500);
-  res.render("error");
-});
-
-export const auth = betterAuth({
-  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3001/",
-  emailAndPassword: { enabled: true },
-  trustedOrigins: ["http://localhost:3000"],
-  database: prismaAdapter(prisma, {
-    provider: "postgresql"
-  }),
+  res.json({ message: "An error occurred", error: err.message });
 });
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
 
-app.all("/api/auth/*", toNodeHandler(auth));
+loadCounties()
+populateDevices()
 
 export default app;

@@ -1,0 +1,91 @@
+{
+    "utilities": [
+        {
+            "name": "Florida Power & Light Company",
+            "rates": [
+                {
+                    "name": "Peak",
+                    "rate": 0.1441,
+                    "start": 12,
+                    "end": 20
+                },
+                {
+                    "name": "Off-Peak (Morning)",
+                    "rate": 0.0616,
+                    "start": 0,
+                    "end": 11
+                },
+                {
+                    "name": "Off-Peak (Night)",
+                    "rate": 0.0616,
+                    "start": 21,
+                    "end": 23
+                }
+            ]
+        },
+        {
+            "name": "Duke Energy",
+            "rates": [
+                {
+                    "name": "Peak",
+                    "rate": 0.1109,
+                    "start": 18,
+                    "end": 20
+                },
+                {
+                    "name": "Off-Peak (Day)",
+                    "rate": 0.0822,
+                    "start": 6,
+                    "end": 17
+                },
+                {
+                    "name": "Off-Peak (Night)",
+                    "rate": 0.0822,
+                    "start": 21,
+                    "end": 23
+                },
+                {
+                    "name": "Discount",
+                    "rate": 0.0498,
+                    "start": 0,
+                    "end": 5
+                }
+            ]
+        },
+        {
+            "name": "Orlando Utilities Commission",
+            "rates": [
+                {
+                    "name": "Peak",
+                    "rate": 0.0907,
+                    "start": 13,
+                    "end": 17
+                },
+                {
+                    "name": "Shoulder (Noon)",
+                    "rate": 0.0805,
+                    "start": 11,
+                    "end": 12
+                },
+                {
+                    "name": "Shoulder (Night)",
+                    "rate": 0.0805,
+                    "start": 18,
+                    "end": 19
+                },
+                {
+                    "name": "Off-Peak (Night)",
+                    "rate": 0.0670,
+                    "start": 20,
+                    "end": 23
+                },
+                {
+                    "name": "Off-Peak (Morning)",
+                    "rate": 0.0670,
+                    "start": 0,
+                    "end": 10
+                }
+            ]
+        }
+    ]
+}
