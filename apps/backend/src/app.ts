@@ -54,7 +54,7 @@ app.use(function (
 
   // render the error page
   res.status(err.status || 500);
-  res.render("error");
+  res.json({ message: "An error occurred", error: err.message });
 });
 
 app.listen(port, () => {
