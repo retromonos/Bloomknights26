@@ -3,6 +3,7 @@ import {auth, prisma} from "../app";
 
 import type { Request, Response } from "express";
 import type { OnboardRequest, ScheduleRequest } from "@bloomknights/types"
+import "dotenv/config";
 
 import { fileURLToPath } from 'url';
 import path from 'path';

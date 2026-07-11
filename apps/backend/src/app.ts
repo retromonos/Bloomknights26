@@ -11,6 +11,8 @@ import { createDevice, createDeviceInstance, deleteDeviceInstance, getDeviceInst
 import { handleSchedulerRequest } from "./routes/scheduler.js";
 import { handleOnboardRequest } from "./routes/onboarding.js";
 
+import "dotenv/config";
+
 import cors from "cors";
 const app = express();
 
