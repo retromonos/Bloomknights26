@@ -57,6 +57,8 @@ export function populateDevices() {
       });
     }
   });
+
+  return
 }
 
 export async function createDevice(req: Request, res: Response) {

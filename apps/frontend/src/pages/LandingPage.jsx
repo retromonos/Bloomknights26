@@ -54,7 +54,7 @@ export default function LandingPage() {
               <label>Password<input required type="password" autoComplete="new-password" minLength={8} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="At least 8 characters" /></label>
               {status.error && <div className="ww-signup-error" role="alert">{status.error}</div>}
               <button disabled={status.loading} type="submit" className="ww-button ww-button-primary">
-                {status.loading ? 'Creating account…' : signInInstead ? <>Sign In <ArrowRight size={16} /></> : <>Create account <ArrowRight size={16} /></>}
+                {status.loading ? 'Processing...' : signInInstead ? <>Sign In <ArrowRight size={16} /></> : <>Create account <ArrowRight size={16} /></>}
               </button>
             </form>
           </div>
