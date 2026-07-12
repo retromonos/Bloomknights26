@@ -9,15 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-<<<<<<< Updated upstream
-import { Route as AboutRouteImport } from './routes/about'
 import { Route as WeekRouteImport } from './routes/week'
 import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SavingsRouteImport } from './routes/savings'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as ImpactRouteImport } from './routes/impact'
+import { Route as HomeRouteImport } from './routes/home'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as OnboardingPriorityRouteImport } from './routes/onboarding/priority'
 import { Route as OnboardingPreferencesRouteImport } from './routes/onboarding/preferences'
 import { Route as OnboardingLocationRouteImport } from './routes/onboarding/location'
 import { Route as OnboardingGenerateRouteImport } from './routes/onboarding/generate'
@@ -64,6 +64,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OnboardingPriorityRoute = OnboardingPriorityRouteImport.update({
+  id: '/priority',
+  path: '/priority',
+  getParentRoute: () => OnboardingRoute,
+} as any)
 const OnboardingPreferencesRoute = OnboardingPreferencesRouteImport.update({
   id: '/preferences',
   path: '/preferences',
@@ -92,6 +97,7 @@ const OnboardingAppliancesRoute = OnboardingAppliancesRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/home': typeof HomeRoute
   '/impact': typeof ImpactRoute
   '/onboarding': typeof OnboardingRouteWithChildren
   '/savings': typeof SavingsRoute
@@ -103,9 +109,11 @@ export interface FileRoutesByFullPath {
   '/onboarding/generate': typeof OnboardingGenerateRoute
   '/onboarding/location': typeof OnboardingLocationRoute
   '/onboarding/preferences': typeof OnboardingPreferencesRoute
+  '/onboarding/priority': typeof OnboardingPriorityRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/home': typeof HomeRoute
   '/impact': typeof ImpactRoute
   '/onboarding': typeof OnboardingRouteWithChildren
   '/savings': typeof SavingsRoute
@@ -117,10 +125,12 @@ export interface FileRoutesByTo {
   '/onboarding/generate': typeof OnboardingGenerateRoute
   '/onboarding/location': typeof OnboardingLocationRoute
   '/onboarding/preferences': typeof OnboardingPreferencesRoute
+  '/onboarding/priority': typeof OnboardingPriorityRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/home': typeof HomeRoute
   '/impact': typeof ImpactRoute
   '/onboarding': typeof OnboardingRouteWithChildren
   '/savings': typeof SavingsRoute
@@ -132,11 +142,13 @@ export interface FileRoutesById {
   '/onboarding/generate': typeof OnboardingGenerateRoute
   '/onboarding/location': typeof OnboardingLocationRoute
   '/onboarding/preferences': typeof OnboardingPreferencesRoute
+  '/onboarding/priority': typeof OnboardingPriorityRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/home'
     | '/impact'
     | '/onboarding'
     | '/savings'
@@ -148,9 +160,11 @@ export interface FileRouteTypes {
     | '/onboarding/generate'
     | '/onboarding/location'
     | '/onboarding/preferences'
+    | '/onboarding/priority'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/home'
     | '/impact'
     | '/onboarding'
     | '/savings'
@@ -162,9 +176,11 @@ export interface FileRouteTypes {
     | '/onboarding/generate'
     | '/onboarding/location'
     | '/onboarding/preferences'
+    | '/onboarding/priority'
   id:
     | '__root__'
     | '/'
+    | '/home'
     | '/impact'
     | '/onboarding'
     | '/savings'
@@ -176,10 +192,12 @@ export interface FileRouteTypes {
     | '/onboarding/generate'
     | '/onboarding/location'
     | '/onboarding/preferences'
+    | '/onboarding/priority'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  HomeRoute: typeof HomeRoute
   ImpactRoute: typeof ImpactRoute
   OnboardingRoute: typeof OnboardingRouteWithChildren
   SavingsRoute: typeof SavingsRoute
@@ -232,12 +250,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ImpactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/onboarding/priority': {
+      id: '/onboarding/priority'
+      path: '/priority'
+      fullPath: '/onboarding/priority'
+      preLoaderRoute: typeof OnboardingPriorityRouteImport
+      parentRoute: typeof OnboardingRoute
     }
     '/onboarding/preferences': {
       id: '/onboarding/preferences'
@@ -283,6 +315,7 @@ interface OnboardingRouteChildren {
   OnboardingGenerateRoute: typeof OnboardingGenerateRoute
   OnboardingLocationRoute: typeof OnboardingLocationRoute
   OnboardingPreferencesRoute: typeof OnboardingPreferencesRoute
+  OnboardingPriorityRoute: typeof OnboardingPriorityRoute
 }
 
 const OnboardingRouteChildren: OnboardingRouteChildren = {
@@ -291,6 +324,7 @@ const OnboardingRouteChildren: OnboardingRouteChildren = {
   OnboardingGenerateRoute: OnboardingGenerateRoute,
   OnboardingLocationRoute: OnboardingLocationRoute,
   OnboardingPreferencesRoute: OnboardingPreferencesRoute,
+  OnboardingPriorityRoute: OnboardingPriorityRoute,
 }
 
 const OnboardingRouteWithChildren = OnboardingRoute._addFileChildren(
@@ -299,6 +333,7 @@ const OnboardingRouteWithChildren = OnboardingRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  HomeRoute: HomeRoute,
   ImpactRoute: ImpactRoute,
   OnboardingRoute: OnboardingRouteWithChildren,
   SavingsRoute: SavingsRoute,

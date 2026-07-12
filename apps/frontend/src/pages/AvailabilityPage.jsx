@@ -2,6 +2,61 @@ import { useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { ChevronRight, ChevronLeft, Plus, X } from 'lucide-react'
 import { useWattWhen } from '../lib/WattWhenContext.jsx'
+import { timeWindowBands } from '../data/scheduleData.js'
+
+const minutes = (value) => {
+  if (!value) return null
+  const [hours, mins] = value.split(':').map(Number)
+  return hours * 60 + mins
+}
+
+const rangeSegments = (start, end) => {
+  const from = minutes(start)
+  const to = minutes(end)
+  if (from === null || to === null || from === to) return []
+  return to > from ? [[from, to]] : [[from, 1440], [0, to]]
+}
+
+function TimelineBlock({ start, end, label, tone }) {
+  return (
+    <div className={`ww-timeline-block ${tone}`} style={{ left: `${(start / 1440) * 100}%`, width: `${((end - start) / 1440) * 100}%` }} title={`${label}`}>
+      <span>{label}</span>
+    </div>
+  )
+}
+
+function AvailabilityPreview({ sleepStart, sleepEnd, workStart, workEnd, quietStart, quietEnd, customBlocks }) {
+  const userRanges = [
+    { label: 'Sleep', start: sleepStart, end: sleepEnd, tone: 'sleep' },
+    { label: 'Work / class', start: workStart, end: workEnd, tone: 'work' },
+    { label: 'Quiet', start: quietStart, end: quietEnd, tone: 'quiet' },
+    ...customBlocks.map((block) => ({ label: block.label || 'Custom', start: block.start, end: block.end, tone: 'custom' })),
+  ]
+
+  return (
+    <section className="ww-availability-preview" aria-label="Availability and electricity time window preview">
+      <div className="ww-preview-heading"><div><h2>How your schedule is considered</h2><p>Dotted blocks update from the times above.</p></div><span>24-hour view</span></div>
+      <div className="ww-time-axis">{['12 AM', '6 AM', '12 PM', '6 PM', '12 AM'].map((label) => <span key={label}>{label}</span>)}</div>
+      <div className="ww-timeline-row">
+        <b>Provider windows</b>
+        <div className="ww-timeline-track">
+          {timeWindowBands.map((band, index) => <TimelineBlock key={`${band.label}-${index}`} start={band.start * 60} end={band.end * 60} label={band.label} tone={`band-${band.label.toLowerCase().replaceAll(' ', '-')}`} />)}
+        </div>
+      </div>
+      {userRanges.map((range, rangeIndex) => {
+        const segments = rangeSegments(range.start, range.end)
+        if (!segments.length) return null
+        return (
+          <div className="ww-timeline-row" key={`${range.label}-${rangeIndex}`}>
+            <b>{range.label}</b>
+            <div className="ww-timeline-track user-track">{segments.map(([start, end], index) => <TimelineBlock key={index} start={start} end={end} label={range.label} tone={`user-block ${range.tone}`} />)}</div>
+          </div>
+        )
+      })}
+      <div className="ww-preview-legend"><span className="recommended">Super off-peak</span><span className="offpeak">Off-peak</span><span className="peak">Peak</span><span className="unavailable">Your unavailable time</span></div>
+    </section>
+  )
+}
 
 export default function AvailabilityPage() {
   const { state, update } = useWattWhen()
@@ -110,6 +165,8 @@ export default function AvailabilityPage() {
         </section>
 
       </div>
+
+      <AvailabilityPreview sleepStart={sleepStart} sleepEnd={sleepEnd} workStart={workStart} workEnd={workEnd} quietStart={quietStart} quietEnd={quietEnd} customBlocks={customBlocks} />
 
       <div className="mt-6 flex gap-2">
         <button onClick={() => navigate({ to: '/onboarding/appliances' })} className="flex items-center gap-1 rounded-xl border border-[var(--line)] px-4 py-3 text-sm font-medium text-[var(--sea-ink)]">
