@@ -103,6 +103,7 @@ model Utility {
   name             String            @unique
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
+  dataCode         String            @default("")
   countyUtilities  CountyUtility[]
   utilityInstances UtilityInstance[]
   utilityRates     UtilityRate[]

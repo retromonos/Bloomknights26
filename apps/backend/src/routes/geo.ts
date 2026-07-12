@@ -51,6 +51,7 @@ export default async function loadCounties() {
                 console.log(`Loading utilities for county: ${county.name}`);
                 const utilitiesToCreate = data.result.map(utility => ({
                     name: utility.utilityName.trim(),
+                    code: utilityJson.utilities.find((v) => v.name === utility.utilityName.trim())?.code ?? ""
                     // countyId: county.id
                 }));
 
@@ -150,4 +151,48 @@ export async function requestCountyFromZip(req: Request, res: Response) {
     } catch (err: any) {
         res.status(err.status || 500).json({ message: "An error occurred", error: err.message });
     }
+}
+
+export async function ProductionData(utility: string) {
+
+    const util = await prisma.utility.findFirst({
+        where: {
+            name: utility
+        }
+    })
+    
+    const res = await fetch(`https://www.eia.gov/electricity/930-api/region_data_by_fuel_type/series_data?type%5B0%5D=NG&respondent%5B0%5D=${util?.dataCode}&start=07102026+00%3A00%3A00&end=07102026+23%3A00%3A00&frequency=hourly&timezone=Eastern&series=undefined&limit=10000&offset=0`)
+    const body:any = await res.json()
+
+    const data:any[] = body[0].data
+
+    let clean:number[] = []
+    let normal:number[] = []
+
+    data.forEach((v:any) => {
+        console.log("len", v.VALUES.DATA.length)
+        if(v.FUEL_TYPE_ID === "SUN" || v.FUEL_TYPE_ID === "WAT") {
+            (v.VALUES.DATA as any[]).forEach((d:number, i) => {
+                console.log(i, clean.length)
+                if(!(clean.at(i)) && clean.at(i) != 0) clean.push(d)
+                else if(clean[i]) clean[i] += d
+            })
+        } else {
+            (v.VALUES.DATA as any[]).forEach((d:number, i) => {
+                if(!(normal.at(i)) && normal.at(i) != 0) normal.push(d)
+                else if(normal[i]) normal[i] += d
+            })
+        }
+    })
+
+    return {clean, normal}
+}
+
+export async function GetProductionData(req: Request, res: Response) {
+
+    const body = req.body as {utility: string}
+
+    const data = await ProductionData(body.utility)
+    console.log(data)
+    res.status(200).json({data: data})
 }
