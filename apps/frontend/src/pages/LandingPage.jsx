@@ -38,7 +38,7 @@ export default function LandingPage() {
       <aside className="ww-footprints ww-footprints-left">
         <img className="ww-footprints-art" src="/assets/duck-pattern.png" alt="" aria-hidden="true" />
         <div className="ww-footprint-copy">
-          <h1>Small shifts.<br />Big impact.</h1>
+          <h1>Save watts.<br />Save money.</h1>
           <p>Schedule flexible energy use at cleaner, cheaper times — for your wallet and the planet.</p>
         </div>
       </aside>
@@ -47,7 +47,6 @@ export default function LandingPage() {
           <Brand link={false} />
           <div className="ww-signup-grid">
             <form className="ww-signup-card" onSubmit={submit}>
-              {!signInInstead && <span className="ww-kicker">QUICK START</span>}
               <h2>{signInInstead ? "Sign In" : "Create your account"}</h2>
               {!signInInstead && <label>Name<input required autoComplete="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Your name" /></label>}
               <label>Email<input required type="email" autoComplete="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="you@example.com" /></label>
