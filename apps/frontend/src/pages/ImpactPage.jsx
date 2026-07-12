@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { Info, X } from 'lucide-react'
 import AppShell from '../components/AppShell.jsx'
@@ -6,6 +6,39 @@ import { impactSummary, demandChartData, applianceChartData, timeDistributionDat
 
 export default function ImpactPage() {
   const [showMethodology, setShowMethodology] = useState(false)
+
+  const [chartData, setChartData] = useState()
+
+  useEffect(()=>{
+    async function a() {
+      const res = await fetch("http://localhost:3001/api/utilities/production")
+      const dat = await res.json()
+      const data = dat.data
+      console.log(data)
+      
+      const total = []
+
+      for(let i = 0; i < data.clean.length; i++) {
+          const contender = (data.clean[i]??0) + (data.normal[i]??0)
+          total.push(contender)
+      }
+
+      const ret = []
+
+      for(let i = 0; i < data.clean.length; i++) {
+        ret.push({
+          hour: i,
+          clean: data.clean[i] ?? 0,
+          normal: data.normal[i] ?? 0,
+          total: total[i] ?? 0,
+        })
+      }
+
+      setChartData(ret)
+    }
+
+    void a()
+  },[])
 
   return (
     <AppShell>
@@ -35,20 +68,24 @@ export default function ImpactPage() {
         {/* Charts */}
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Original vs Optimized */}
+          {
+          chartData && 
           <div className="rounded-xl border border-[var(--line)] bg-white p-4">
-            <h2 className="mb-3 text-sm font-semibold text-[var(--sea-ink)]">Original vs Optimized Usage</h2>
+            <h2 className="mb-3 text-sm font-semibold text-[var(--sea-ink)]">Production by Energy Type</h2>
             <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={demandChartData}>
+              <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="hour" tick={{ fontSize: 10 }} />
                 <YAxis tick={{ fontSize: 10 }} />
                 <Tooltip />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Line type="monotone" dataKey="original" stroke="#ef4444" name="Original" strokeWidth={2} />
-                <Line type="monotone" dataKey="optimized" stroke="var(--lagoon)" name="Optimized" strokeWidth={2} />
+                <Line type="monotone" dataKey="total" stroke="#ef4444" name="Total Production" strokeWidth={2} />
+                <Line type="monotone" dataKey="clean" stroke="var(--lagoon)" name="Clean Energy" strokeWidth={2} />
+                <Line type="monotone" dataKey="normal" stroke="var(--lagoon)" name="Dirty Energy" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
           </div>
+          }
 
           {/* By appliance */}
           <div className="rounded-xl border border-[var(--line)] bg-white p-4">
