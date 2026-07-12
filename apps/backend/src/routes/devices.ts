@@ -42,6 +42,16 @@ export function populateDevices() {
         powerDraw: 8,
         stockName: "ev-charging-external"
     },
+    {
+        name: "Cooking",
+        powerDraw: 2.0,
+        stockName: "cooking"
+    },
+    {
+        name: "Device Charging",
+        powerDraw: 0.05,
+        stockName: "device-charging"
+    },
   ];
 
   devices.forEach(async (device) => {

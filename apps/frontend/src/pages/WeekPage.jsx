@@ -1,10 +1,41 @@
-import { Fragment, useState } from 'react'
+import { Fragment, useState, useMemo } from 'react'
 import { ChevronLeft, ChevronRight, Plus, Download, GripVertical, X, Move, PencilLine } from 'lucide-react'
 import AppShell from '../components/AppShell.jsx'
 import SustainabilityTip from '../components/SustainabilityTip.jsx'
 import { weeklySchedule, weeklySummary, daysOfWeek, fullDays, timeSlots } from '../data/scheduleData.js'
 import { providerPlaceholder } from '../data/providerData.js'
 import { useWattWhen } from '../lib/WattWhenContext.jsx'
+
+const iconNameMap = {
+  'Laundry': '👕',
+  'Dishwasher': '🍽️',
+  'PC / Computer': '🖥️',
+  'EV Charging': '🔌',
+  'Cooking': '🍳',
+  'Device Charging': '📱',
+}
+
+function mapScheduleItems(items = []) {
+  return items.map((item) => {
+    const start = new Date(item.startTime)
+    const end = new Date(item.endTime)
+    const startHour = start.getUTCHours()
+    const endHour = end.getUTCHours() + (end.getUTCMinutes() > 0 ? 1 : 0)
+    const duration = Math.max(1, endHour - startHour)
+    return {
+      id: item.id,
+      name: item.name,
+      day: item.dayOfWeek,
+      startHour,
+      duration,
+      kwh: item.kwh || 0,
+      status: 'optimized',
+      flexibility: 'anytime',
+      originalHour: startHour,
+      icon: iconNameMap[item.name] || '⚡',
+    }
+  })
+}
 
 const defaultCalendarBands = [
   { id: 'super', label: 'Super off-peak', color: '#7cb40e', windows: [[0, 6]] },
@@ -23,7 +54,12 @@ function availabilityWindows(availability = {}) {
 
 export default function WeekPage() {
   const { state, update } = useWattWhen()
-  const [tasks, setTasks] = useState(weeklySchedule)
+  const hasRealSchedule = Boolean(state.scheduleResult?.scheduleItems?.length)
+  const initialTasks = useMemo(() => {
+    const items = state.scheduleResult?.scheduleItems
+    return items?.length ? mapScheduleItems(items) : weeklySchedule
+  }, [])
+  const [tasks, setTasks] = useState(initialTasks)
   const [editMode, setEditMode] = useState(false)
   const [dragTaskId, setDragTaskId] = useState(null)
   const [selectedDay, setSelectedDay] = useState(new Date().getDay())
@@ -168,8 +204,8 @@ export default function WeekPage() {
               </div>
             ))}
 
-            {/* Hour rows (6 AM to 11 PM to keep it manageable) */}
-            {Array.from({ length: 18 }, (_, i) => i + 6).map((hour) => (
+            {/* Hour rows (full 24-hour view) */}
+            {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
               <Fragment key={hour}>
                 <div className="border-b border-r border-[var(--line)] p-1 text-right text-[10px] text-[var(--sea-ink-soft)]">
                   {timeSlots[hour]}
@@ -229,23 +265,31 @@ export default function WeekPage() {
           </div>
         </div>
 
-        <p className="mt-2 text-center text-[10px] text-[var(--sea-ink-soft)]">Demonstration recommendation</p>
+        <p className="mt-2 text-center text-[10px] text-[var(--sea-ink-soft)]">{hasRealSchedule ? 'Optimised schedule based on your provider rates' : 'Demonstration recommendation'}</p>
 
         {/* Weekly summary */}
         <aside className="mt-4 rounded-xl border border-[var(--line)] bg-white p-4">
           <h2 className="mb-3 text-sm font-semibold text-[var(--sea-ink)]">Weekly Summary</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {[
-              { label: 'Total kWh', value: weeklySummary.totalKwh },
-              { label: 'Flexible kWh', value: weeklySummary.flexibleKwh },
-              { label: 'Shifted kWh', value: weeklySummary.shiftedKwh },
-              { label: 'Score', value: weeklySummary.timingScore },
-            ].map((item) => (
-              <div key={item.label} className="text-center">
-                <div className="text-lg font-bold text-[var(--lagoon)]">{item.value}</div>
-                <div className="text-[10px] text-[var(--sea-ink-soft)]">{item.label}</div>
-              </div>
-            ))}
+            {(() => {
+              const summary = hasRealSchedule ? {
+                totalKwh: tasks.length,
+                flexibleKwh: tasks.filter((t) => t.flexibility !== 'fixed').length,
+                shiftedKwh: tasks.filter((t) => t.status === 'optimized').length,
+                timingScore: tasks.length,
+              } : weeklySummary
+              return [
+                { label: hasRealSchedule ? 'Total tasks' : 'Total kWh', value: summary.totalKwh },
+                { label: hasRealSchedule ? 'Flexible' : 'Flexible kWh', value: summary.flexibleKwh },
+                { label: hasRealSchedule ? 'Optimised' : 'Shifted kWh', value: summary.shiftedKwh },
+                { label: hasRealSchedule ? 'Scheduled' : 'Score', value: summary.timingScore },
+              ].map((item) => (
+                <div key={item.label} className="text-center">
+                  <div className="text-lg font-bold text-[var(--lagoon)]">{item.value}</div>
+                  <div className="text-[10px] text-[var(--sea-ink-soft)]">{item.label}</div>
+                </div>
+              ))
+            })()}
           </div>
         </aside>
       </div>
@@ -404,7 +448,7 @@ function TaskDetailPanel({ task, onClose, onMove }) {
           <div className="flex justify-between"><dt className="text-[var(--sea-ink-soft)]">Current time</dt><dd>{timeSlots[task.startHour]}</dd></div>
           <div className="flex justify-between"><dt className="text-[var(--sea-ink-soft)]">Day</dt><dd>{fullDays[task.day]}</dd></div>
           <div className="flex justify-between"><dt className="text-[var(--sea-ink-soft)]">Duration</dt><dd>{task.duration}h</dd></div>
-          <div className="flex justify-between"><dt className="text-[var(--sea-ink-soft)]">Electricity use</dt><dd>{task.kwh} kWh (placeholder)</dd></div>
+          <div className="flex justify-between"><dt className="text-[var(--sea-ink-soft)]">Electricity use</dt><dd>{task.kwh} kWh</dd></div>
           <div className="flex justify-between"><dt className="text-[var(--sea-ink-soft)]">Flexibility</dt><dd className="capitalize">{task.flexibility.replace('-', ' ')}</dd></div>
           <div className="flex justify-between"><dt className="text-[var(--sea-ink-soft)]">Score</dt><dd>Placeholder</dd></div>
         </dl>

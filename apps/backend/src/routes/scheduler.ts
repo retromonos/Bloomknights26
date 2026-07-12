@@ -1,10 +1,18 @@
 import type { Request, Response } from "express";
-import type { CustomDeviceRequest, DeviceInstance, DeviceRequest, PopulatedDeviceInstance, PowerItem, ScheduleRequest, TimeBlock } from "@bloomknights/types"
+import type { CustomDeviceRequest, DeviceInstance, DeviceRequest, PopulatedDeviceInstance, PowerItem, ScheduleRequest, SchedulingStrategyType, TimeBlock } from "@bloomknights/types"
 import { auth } from "../app";
 import { createDeviceInstance, getDeviceByStockName, populateDeviceInstance } from "../repository/deviceRepository";
 import { createTimeBlock } from "../repository/timeBlockRepository";
 import { getUtilityRatesForUser } from "../repository/utilityRepository";
 import { generateWeeklySchedule } from "../lib/scheduler";
+
+function resolveStrategy(preference?: SchedulingStrategyType) {
+    switch (preference) {
+        case 'environmental': return { type: 'environmental' as const }
+        case 'balanced': return { type: 'balanced' as const, costWeight: 0.5, environmentalWeight: 0.5 }
+        default: return { type: 'cost' as const }
+    }
+}
 
 export async function handleSchedulerRequest(req: Request, res: Response) {
     try {
@@ -59,7 +67,7 @@ export async function handleSchedulerRequest(req: Request, res: Response) {
             powerItems,
             timeBlocks: schedulerTimeBlocks,
             utilityRates,
-            strategy: { type: 'cost' },
+            strategy: resolveStrategy(body.strategy),
             options: { deviceNames },
         });
 

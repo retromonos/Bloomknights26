@@ -53,7 +53,7 @@ app.delete("/api/device/instance/delete", deleteDeviceInstance)
 app.put("/api/device/instance/update", updateDeviceInstance)
 app.get("/api/device/instance", getDeviceInstances)
 app.get("/api/device", getDevices)
-app.post("/api/utilities/byCounty", GetUtilitiesByCounty)
+app.use("/api/utilities/byCounty", GetUtilitiesByCounty)
 
 // error handler
 app.use(function (

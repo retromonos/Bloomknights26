@@ -172,6 +172,7 @@ export type GeneratedScheduleItem = {
   startTime: Date;
   endTime: Date;
   deviceId: string;
+  kwh: number;
 };
 
 export interface SchedulingWarning {
@@ -408,16 +409,14 @@ function resolveStrategyWeights(strategy: SchedulingStrategy): { cost: number; e
 // Candidate generation
 // ─────────────────────────────────────────────────────────────────────────────────
 
-function generateCandidates(durationMinutes: number, blockedIntervals: Interval[], granularity: number): Candidate[] {
+function generateCandidates(durationMinutes: number, granularity: number): Candidate[] {
   const candidates: Candidate[] = [];
   for (let day = 0; day < 7; day++) {
     const dayStart = day * DAY_MINUTES;
     const lastStart = dayStart + DAY_MINUTES - durationMinutes;
     for (let start = dayStart; start <= lastStart; start += granularity) {
       const end = start + durationMinutes;
-      if (!overlapsAny(start, end, blockedIntervals)) {
-        candidates.push({ start, end, dayOfWeek: day });
-      }
+      candidates.push({ start, end, dayOfWeek: day });
     }
   }
   return candidates;
@@ -513,6 +512,7 @@ function buildScheduleItem(
 ): GeneratedScheduleItem {
   const startOfDayMin = candidate.start - candidate.dayOfWeek * DAY_MINUTES;
   const endOfDayMin = candidate.end - candidate.dayOfWeek * DAY_MINUTES;
+  const kwh = Math.round(item.powerDraw * item.duration * 100) / 100;
   return {
     id: idGenerator(),
     name: deviceNames?.[item.deviceId] ?? 'Scheduled run',
@@ -521,6 +521,7 @@ function buildScheduleItem(
     startTime: dateFromReference(referenceWeekStart, candidate.dayOfWeek, startOfDayMin, tzMode),
     endTime: dateFromReference(referenceWeekStart, candidate.dayOfWeek, endOfDayMin, tzMode),
     deviceId: item.deviceId,
+    kwh,
   };
 }
 
@@ -581,24 +582,27 @@ export function generateWeeklySchedule(params: GenerateScheduleParams): Generate
       continue;
     }
 
-    const candidates = generateCandidates(durationMinutes, blockedIntervals, granularity);
-    if (candidates.length === 0) {
-      warnings.push({
-        deviceId: item.deviceId,
-        message: 'No time slot of the required duration avoids the configured time blocks; skipped entirely.',
-      });
-      continue;
-    }
+    const candidates = generateCandidates(durationMinutes, granularity);
 
     const rawCosts = candidates.map((c) => rawCostScore(c, item.powerDraw, utilityRates));
     const rawEnv = candidates.map((c) => rawEnvironmentalScore(c, environmentalProvider, granularity));
     const costNorm = normalizeScores(rawCosts);
     const envNorm = normalizeScores(rawEnv);
 
-    const scored: ScoredCandidate[] = candidates.map((c, i) => ({
-      ...c,
-      score: weights.cost * costNorm[i]! + weights.environmental * envNorm[i]!,
-    }));
+    // Candidates that overlap blocked intervals get a heavy penalty so they are
+    // only chosen when no clean slot exists.  The penalty is large enough that
+    // normalised cost/env scores (0-1) never overcome it, but it preserves the
+    // relative ordering among penalised candidates so the scheduler still picks
+    // the least-bad option.
+    const BLOCKED_PENALTY = 100;
+
+    const scored: ScoredCandidate[] = candidates.map((c, i) => {
+      const overlapsBlocked = blockedIntervals.some((iv) => c.start < iv.end && iv.start < c.end);
+      return {
+        ...c,
+        score: weights.cost * costNorm[i]! + weights.environmental * envNorm[i]! + (overlapsBlocked ? BLOCKED_PENALTY : 0),
+      };
+    });
 
     const averageIntervalHours = WEEK_MINUTES / 60 / frequency;
     const minGapMinutes = Math.round((options.minGapHours ?? Math.max(2, averageIntervalHours * 0.5)) * 60);
@@ -610,6 +614,13 @@ export function generateWeeklySchedule(params: GenerateScheduleParams): Generate
     placedByDevice.set(item.deviceId, [...placedForDevice, ...chosen.map((c) => ({ start: c.start, end: c.end }))]);
 
     for (const c of chosen) {
+      const overlapsBlocked = blockedIntervals.some((iv) => c.start < iv.end && iv.start < c.end);
+      if (overlapsBlocked) {
+        warnings.push({
+          deviceId: item.deviceId,
+          message: `"${options.deviceNames?.[item.deviceId] ?? item.deviceId}" couldn't be fully placed outside unavailable hours and was scheduled during a blocked period.`,
+        });
+      }
       result.push(buildScheduleItem(c, item, userId, referenceWeekStart, idGenerator, options.deviceNames, tzMode));
     }
   }

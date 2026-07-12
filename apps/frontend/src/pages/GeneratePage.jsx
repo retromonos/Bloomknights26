@@ -1,11 +1,22 @@
-import { Link, useNavigate } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
-import { ArrowRight, Check, Leaf, PiggyBank, Zap } from 'lucide-react'
+import { useNavigate } from '@tanstack/react-router'
+import { useEffect, useRef, useState } from 'react'
+import { ArrowRight, Check, Leaf, Zap, AlertTriangle } from 'lucide-react'
 import { useWattWhen } from '../lib/WattWhenContext.jsx'
 import { DuckMark } from '../components/Brand.jsx'
-import { providerOptions } from '../data/providerData.js'
-import { savingsSummary } from '../data/savingsData.js'
-import { weeklySummary } from '../data/scheduleData.js'
+import { generateSchedule } from '../lib/scheduler.ts'
+import { frequencyToNumber, minutesToHours } from '../lib/devices.ts'
+import { appliancePresets } from '../data/applianceData.js'
+
+const REFERENCE_DATE = '2024-01-07'
+
+const stockNameMap = {
+  'laundry': 'laundry',
+  'dishwasher': 'dishwasher',
+  'gaming-pc': 'pc-gaming',
+  'ev-charger': 'ev-charging-wall',
+  'cooking': 'cooking',
+  'device-charging': 'device-charging',
+}
 
 const steps = [
   'Matching your electricity provider',
@@ -25,21 +36,102 @@ const tips = [
   'Charging an EV overnight often avoids the busiest household demand window.',
 ]
 
+function buildTimeBlocks(type, start, end) {
+  if (!start || !end) return []
+  const [sh, sm] = start.split(':').map(Number)
+  const [eh, em] = end.split(':').map(Number)
+  const startMinutes = sh * 60 + sm
+  const endMinutes = eh * 60 + em
+  const wrapsMidnight = endMinutes <= startMinutes
+  const blocks = []
+  for (let day = 0; day < 7; day++) {
+    const endDay = wrapsMidnight ? (day + 1) % 7 : day
+    blocks.push({
+      startTime: `${REFERENCE_DATE}T${String(sh).padStart(2, '0')}:${String(sm).padStart(2, '0')}:00.000Z`,
+      endTime: `${REFERENCE_DATE}T${String(eh).padStart(2, '0')}:${String(em).padStart(2, '0')}:00.000Z`,
+      startDayOfWeek: day,
+      endDayOfWeek: endDay,
+      type,
+    })
+  }
+  return blocks
+}
+
+function preferenceToStrategy(preference) {
+  switch (preference) {
+    case 'cleaner': return 'environmental'
+    case 'lower-cost': return 'cost'
+    case 'balanced': return 'balanced'
+    default: return 'cost'
+  }
+}
+
+function buildScheduleRequest(state) {
+  const configs = state.applianceConfigs || {}
+  const devices = (state.selectedAppliances || [])
+    .map((id) => {
+      const preset = appliancePresets.find((p) => p.id === id)
+      const stockName = stockNameMap[id]
+      if (!stockName) return null
+      const cfg = { ...preset, ...(configs[id] || {}) }
+      return {
+        stockName,
+        frequency: frequencyToNumber(cfg.frequency),
+        duration: minutesToHours(cfg.duration),
+        isCustom: false,
+      }
+    })
+    .filter(Boolean)
+
+  const avail = state.availability || {}
+  const timeBlocks = [
+    ...buildTimeBlocks('sleep', avail.sleepStart, avail.sleepEnd),
+    ...buildTimeBlocks('work', avail.workStart, avail.workEnd),
+    ...buildTimeBlocks('quiet', avail.quietStart, avail.quietEnd),
+    ...(avail.customBlocks || []).flatMap((block) => buildTimeBlocks('custom', block.start, block.end)),
+  ]
+
+  return { devices, timeBlocks, strategy: preferenceToStrategy(state.preference) }
+}
+
 export default function GeneratePage() {
   const { state, update } = useWattWhen()
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
   const [tip, setTip] = useState(0)
   const [done, setDone] = useState(false)
+  const [error, setError] = useState(null)
+  const apiDone = useRef(false)
+  const animDone = useRef(false)
 
   const householdName = state.account?.name?.split(/\s+/)[0] || 'Your'
-  const selectedAppliances = state.selectedAppliances?.length || 0
-  const selectedProviderId = state.providerSelection || state.provider
-  const providerName = providerOptions.find((provider) => provider.id === selectedProviderId)?.name || 'your provider'
-  const monthlySavings = Math.round(savingsSummary.thisMonth)
-  const weeklyUsage = weeklySummary.totalKwh
-  const shiftedKwh = weeklySummary.shiftedKwh
-  const baselineWeeklyUsage = Math.round(weeklyUsage + shiftedKwh)
+  const warnings = state.scheduleResult?.warnings || []
+
+  const markDone = () => {
+    if (apiDone.current && animDone.current) {
+      update('onboardingComplete', true)
+      setDone(true)
+    }
+  }
+
+  useEffect(() => {
+    let cancelled = false
+    const request = buildScheduleRequest(state)
+    generateSchedule(request)
+      .then((result) => {
+        if (cancelled) return
+        update('scheduleResult', result)
+        apiDone.current = true
+        markDone()
+      })
+      .catch((err) => {
+        if (cancelled) return
+        setError(err.message || 'Failed to generate schedule')
+        apiDone.current = true
+        markDone()
+      })
+    return () => { cancelled = true }
+  }, [])
 
   useEffect(() => {
     if (done) return
@@ -48,12 +140,12 @@ export default function GeneratePage() {
         setStep((value) => value + 1)
         setTip((value) => (value + 1) % tips.length)
       } else {
-        update('onboardingComplete', true)
-        setDone(true)
+        animDone.current = true
+        markDone()
       }
     }, 900)
     return () => clearTimeout(timer)
-  }, [step, done, update])
+  }, [step, done])
 
   if (done) {
     return (
@@ -67,48 +159,37 @@ export default function GeneratePage() {
           <p className="ww-plan-intro">
             Based on your location, provider, appliance mix, and schedule preferences, we mapped out a week that uses cleaner and cheaper energy hours more often.
           </p>
-          <p className="ww-plan-context">
-            Your plan reflects {providerName}, {selectedAppliances} selected appliances, and the timing windows you marked as available during onboarding.
-          </p>
+
+          {warnings.length > 0 && (
+            <div className="ww-plan-warnings">
+              {warnings.map((w, i) => (
+                <div key={i} className="ww-plan-warning">
+                  <AlertTriangle size={14} />
+                  <span>{w.message}</span>
+                </div>
+              ))}
+            </div>
+          )}
 
           <div className="ww-plan-summary-grid">
-            <article className="ww-plan-card ww-plan-card-savings">
-              <div className="ww-plan-card-icon"><PiggyBank size={34} /></div>
-              <div className="ww-plan-card-copy">
-                <strong>${monthlySavings}</strong>
-                <span>estimated monthly savings</span>
-                <small>on your electric bill</small>
-              </div>
-            </article>
-
             <article className="ww-plan-card ww-plan-card-usage">
               <div className="ww-plan-card-icon"><Zap size={34} /></div>
               <div className="ww-plan-card-copy">
-                <strong>{weeklyUsage.toFixed(1)} kWh</strong>
-                <span>estimated weekly usage</span>
-                <small>down from {baselineWeeklyUsage} kWh/week</small>
-                <em>{shiftedKwh.toFixed(0)} kWh shifted to cleaner energy hours</em>
-              </div>
-            </article>
-
-            <article className="ww-plan-card ww-plan-card-peak">
-              <div className="ww-plan-card-icon"><Zap size={34} /></div>
-              <div className="ww-plan-card-copy">
-                <strong>22%</strong>
-                <span>less peak-hour usage</span>
-                <small>Your flexible tasks move into cleaner, cheaper time windows.</small>
+                <strong>{state.scheduleResult?.scheduleItems?.length || 0} tasks</strong>
+                <span>scheduled for the week</span>
+                <small>optimised for cost and availability</small>
               </div>
             </article>
           </div>
 
           <div className="ww-plan-footnote">
             <Leaf size={15} />
-            <span>You&apos;ll find the full schedule, suggested shifts, and savings breakdown on your dashboard.</span>
+            <span>You&apos;ll find the full schedule and suggested shifts on your calendar.</span>
           </div>
 
           <div className="ww-plan-actions">
-            <button onClick={() => navigate({ to: '/home' })} className="ww-plan-primary">
-              Open my dashboard <ArrowRight size={16} />
+            <button onClick={() => navigate({ to: '/week' })} className="ww-plan-primary">
+              View my schedule <ArrowRight size={16} />
             </button>
           </div>
 
@@ -132,7 +213,7 @@ export default function GeneratePage() {
             ))}
           </div>
           <div className="ww-generate-bar"><i style={{ width: `${((step + 1) / steps.length) * 100}%` }} /></div>
-          <small>Simulated recommendations using placeholder electricity data.</small>
+          {error && <small className="text-red-500">{error}</small>}
         </div>
       </section>
       <aside className="ww-generate-tips">
