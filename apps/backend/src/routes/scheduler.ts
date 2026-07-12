@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import type { CustomDeviceRequest, DayOfWeek, DeviceInstance, DeviceRequest, PopulatedDeviceInstance, PowerItem, ScheduleRequest, TimeBlock } from "@bloomknights/types"
-import { auth } from "../app";
+import { auth, prisma } from "../app";
 import { createDeviceInstance, getDeviceByStockName, populateDeviceInstance } from "../repository/deviceRepository";
 import { createTimeBlock } from "../repository/timeBlockRepository";
 import { getUtilityRatesForUser } from "../repository/utilityRepository";
@@ -55,8 +55,20 @@ export async function handleSchedulerRequest(req: Request, res: Response) {
 
         const utilityRates = await getUtilityRatesForUser(session.user.id);
 
+        const utilityI = await prisma.utilityInstance.findFirst({
+            where: {
+                userId: session.user.id
+            }
+        })
+
+        const utility = await prisma.utility.findFirst({
+            where: {
+                id: utilityI?.utilityId || ""
+            }
+        })
+
         const getIntensity = async (dayOfWeek:DayOfWeek, hourOfDay: number) : Promise<number> => {
-            const data = await ProductionData("Duke Energy")
+            const data = await ProductionData(utility ? utility.name : "Duke Energy")
 
             let max = 0
             const total:number[] = []
