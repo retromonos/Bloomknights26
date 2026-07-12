@@ -1,8 +1,11 @@
 export type DayOfWeek = number;
 
 export type TimeBlock = {
-  start: Date;
-  end: Date;
+  id: string;
+  startTime: Date;
+  endTime: Date;
   startDayOfWeek: DayOfWeek;
   endDayOfWeek: DayOfWeek;
+  type: string;
+  userId: string;
 }

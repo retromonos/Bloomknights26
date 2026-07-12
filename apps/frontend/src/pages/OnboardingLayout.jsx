@@ -1,9 +1,11 @@
-import { Outlet, useNavigate, useRouterState } from '@tanstack/react-router'
+import { Outlet, useNavigate, useRouterState, useSearch } from '@tanstack/react-router'
 import { Check, ChevronRight, Minus } from 'lucide-react'
 import Brand from '../components/Brand.jsx'
 import { appliancePresets } from '../data/applianceData.js'
 import { useWattWhen } from '../lib/WattWhenContext.jsx'
 import { providerOptions } from '../data/providerData.js'
+import { useEffect, useState } from 'react'
+import { GetCountyUtilities } from '#/lib/utilities.js'
 
 const steps = [
   ['/onboarding/location', 'Location'],
@@ -29,6 +31,23 @@ function CountyProviderPanel({ open }) {
     update('useGenericProviderEstimate', selected === 'generic')
     navigate({ to: '/onboarding/appliances' })
   }
+
+  const [foundUtilities, setFoundUtilities] = useState([])
+
+  useEffect(() => {
+    console.log("county changed")
+
+    async function a() {
+      console.log("state:", state.detectedCounty)
+      const utils = await GetCountyUtilities(state.detectedCounty, state.account?.token?.trim().split(/\s+/)[0])
+      console.log(utils)
+      if(utils)
+        setFoundUtilities(utils.utilities ?? [])
+    }
+
+    void a()
+  },[state.detectedCounty])
+
   return (
     <aside className={`ww-info-panel ww-provider-panel${open ? ' is-open' : ''}`} aria-hidden={!open} inert={!open ? '' : undefined}>
       <span className="ww-kicker">LOCATION FOUND</span>
@@ -36,10 +55,10 @@ function CountyProviderPanel({ open }) {
       <p className="ww-county-caption">These are your county providers.</p>
       <p>Select the electricity provider shown on your bill.</p>
       <div className="ww-provider-list">
-        {providerOptions.map((provider) => (
+        {foundUtilities.map((provider) => (
           <label className={selected === provider.id ? 'selected' : ''} key={provider.id}>
             <input type="radio" name="county-provider" checked={selected === provider.id} onChange={() => choose(provider.id)} />
-            <span><strong>{provider.name}</strong><small>{provider.planName} · {provider.planType}</small></span>
+            <span><strong>{provider.name}</strong></span>
           </label>
         ))}
         <label className={selected === 'generic' ? 'selected' : ''}>

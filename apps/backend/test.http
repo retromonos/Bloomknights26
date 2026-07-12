@@ -1,0 +1,96 @@
+## Sign up request
+POST http://localhost:3001/api/auth/sign-up/email
+
+# @name signup
+Content-Type: application/json
+Origin: http://localhost:3000
+
+{
+  "email": "asdfasdfsafds@gmail.com",
+  "name": "george",
+  "password": "1234567890"
+}
+
+### Sign in request
+POST http://localhost:3001/api/auth/sign-in/email
+# @name login
+Content-Type: application/json
+Origin: http://localhost:3000
+
+{
+  "email": "asdfasdfsafds@gmail.com",
+  "password": "1234567890"
+}
+
+### Test Scheduler Request
+POST http://localhost:3001/api/schedule
+Content-Type: application/json
+Cookie: better-auth.session_token={{login.response.headers.Set-Cookie.split(";")[0].split("=")[1]}}
+
+{
+  "devices": [
+    {
+      "frequency": 3,
+      "duration": 2,
+      "isCustom": false,
+      "stockName": "dishwasher"
+    },
+    {
+      "frequency": 2,
+      "duration": 0.5,
+      "isCustom": false,
+      "stockName": "pc-gaming"
+    }
+  ],
+  "timeBlocks": [
+    {
+      "startTime": "2024-06-01T00:00:00.000Z",
+      "endTime": "2024-06-01T07:00:00.000Z",
+      "startDayOfWeek": 0,
+      "endDayOfWeek": 0,
+      "type": "sleep"
+    },
+    {
+      "startTime": "2024-06-02T00:00:00.000Z",
+      "endTime": "2024-06-02T07:00:00.000Z",
+      "startDayOfWeek": 1,
+      "endDayOfWeek": 1,
+      "type": "sleep"
+    },
+    {
+      "startTime": "2024-06-03T00:00:00.000Z",
+      "endTime": "2024-06-03T07:00:00.000Z",
+      "startDayOfWeek": 2,
+      "endDayOfWeek": 2,
+      "type": "sleep"
+    },
+    {
+      "startTime": "2024-06-04T00:00:00.000Z",
+      "endTime": "2024-06-04T07:00:00.000Z",
+      "startDayOfWeek": 3,
+      "endDayOfWeek": 3,
+      "type": "sleep"
+    },
+    {
+      "startTime": "2024-06-05T00:00:00.000Z",
+      "endTime": "2024-06-05T07:00:00.000Z",
+      "startDayOfWeek": 4,
+      "endDayOfWeek": 4,
+      "type": "sleep"
+    },
+    {
+      "startTime": "2024-06-06T00:00:00.000Z",
+      "endTime": "2024-06-06T07:00:00.000Z",
+      "startDayOfWeek": 5,
+      "endDayOfWeek": 5,
+      "type": "sleep"
+    },
+    {
+      "startTime": "2024-06-07T00:00:00.000Z",
+      "endTime": "2024-06-07T07:00:00.000Z",
+      "startDayOfWeek": 6,
+      "endDayOfWeek": 6,
+      "type": "sleep"
+    }
+  ]
+}

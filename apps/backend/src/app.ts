@@ -9,9 +9,12 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import loadCounties, { requestCountyFromZip } from "./routes/geo.js";
 import { createDevice, createDeviceInstance, deleteDeviceInstance, getDeviceInstances, getDevices, populateDevices, updateDeviceInstance } from "./routes/devices.js";
 import { handleSchedulerRequest } from "./routes/scheduler.js";
-import { handleOnboardRequest } from "./routes/onboarding.js";
+import { GetUtilitiesByCounty, handleOnboardRequest } from "./routes/onboarding.js";
+
+import "dotenv/config";
 
 import cors from "cors";
+import { bearer } from "better-auth/plugins";
 const app = express();
 
 const port = process.env.PORT || 3001;
@@ -32,21 +35,25 @@ export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3001/",
   emailAndPassword: { enabled: true },
   trustedOrigins: ["http://localhost:3000"],
+  plugins: [
+    bearer()
+  ],
   database: prismaAdapter(prisma, {
     provider: "postgresql"
   }),
 });
 
 app.all("/api/auth/*", toNodeHandler(auth));
-app.use("/api/schedule", handleSchedulerRequest);
-app.use("/api/onboard", handleOnboardRequest);
-app.use("/api/zip", requestCountyFromZip)
-app.use("/api/device/create", createDevice)
-app.use("/api/device", getDevices)
-app.use("/api/device/instance", getDeviceInstances)
-app.use("/api/device/instance/create", createDeviceInstance)
-app.use("/api/device/instance/delete", deleteDeviceInstance)
-app.use("/api/device/instance/update", updateDeviceInstance)
+app.post("/api/schedule", handleSchedulerRequest);
+app.post("/api/onboard", handleOnboardRequest);
+app.post("/api/zip", requestCountyFromZip)
+app.post("/api/device/create", createDevice)
+app.post("/api/device/instance/create", createDeviceInstance)
+app.delete("/api/device/instance/delete", deleteDeviceInstance)
+app.put("/api/device/instance/update", updateDeviceInstance)
+app.get("/api/device/instance", getDeviceInstances)
+app.get("/api/device", getDevices)
+app.post("/api/utilities/byCounty", GetUtilitiesByCounty)
 
 // error handler
 app.use(function (
@@ -68,7 +75,11 @@ app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
 
-loadCounties()
-populateDevices()
+async function initialize() {
+  await loadCounties()
+  await populateDevices()
+}
+
+initialize()
 
 export default app;
