@@ -36,7 +36,7 @@ export default function LandingPage() {
   return (
     <main className="ww-welcome ww-account-landing">
       <aside className="ww-footprints ww-footprints-left">
-        {[0, 1, 2, 3, 4].map((step) => <span key={step} style={{ '--step': step }}>◆</span>)}
+        <img className="ww-footprints-art" src="/assets/duck-pattern.png" alt="" aria-hidden="true" />
         <div className="ww-footprint-copy">
           <h1>Small shifts.<br />Big impact.</h1>
           <p>Schedule flexible energy use at cleaner, cheaper times — for your wallet and the planet.</p>

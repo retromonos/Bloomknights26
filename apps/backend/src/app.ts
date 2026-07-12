@@ -44,16 +44,16 @@ export const auth = betterAuth({
 });
 
 app.all("/api/auth/*", toNodeHandler(auth));
-app.use("/api/schedule", handleSchedulerRequest);
-app.use("/api/onboard", handleOnboardRequest);
-app.use("/api/zip", requestCountyFromZip)
-app.use("/api/device/create", createDevice)
-app.use("/api/device", getDevices)
-app.use("/api/device/instance", getDeviceInstances)
-app.use("/api/device/instance/create", createDeviceInstance)
-app.use("/api/device/instance/delete", deleteDeviceInstance)
-app.use("/api/device/instance/update", updateDeviceInstance)
-app.use("/api/utilities/byCounty", GetUtilitiesByCounty)
+app.post("/api/schedule", handleSchedulerRequest);
+app.post("/api/onboard", handleOnboardRequest);
+app.post("/api/zip", requestCountyFromZip)
+app.post("/api/device/create", createDevice)
+app.post("/api/device/instance/create", createDeviceInstance)
+app.delete("/api/device/instance/delete", deleteDeviceInstance)
+app.put("/api/device/instance/update", updateDeviceInstance)
+app.get("/api/device/instance", getDeviceInstances)
+app.get("/api/device", getDevices)
+app.post("/api/utilities/byCounty", GetUtilitiesByCounty)
 app.use("/api/utilities/production", GetProductionData)
 
 // error handler

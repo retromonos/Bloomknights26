@@ -3,6 +3,14 @@ import { useEffect, useState } from 'react'
 import { Check, Plus, ChevronRight, ChevronLeft, X } from 'lucide-react'
 import { useWattWhen } from '../lib/WattWhenContext.jsx'
 import { appliancePresets } from '../data/applianceData.js'
+import { getDevices, createDevice, createDeviceInstance, frequencyToNumber, minutesToHours } from '../lib/devices.ts'
+
+const stockNameMap = {
+  'laundry': 'laundry',
+  'dishwasher': 'dishwasher',
+  'gaming-pc': 'pc-gaming',
+  'ev-charger': 'ev-charging-wall',
+}
 
 export default function AppliancesPage() {
   const { state, update } = useWattWhen()
@@ -11,6 +19,11 @@ export default function AppliancesPage() {
   const [editing, setEditing] = useState(null)
   const [configs, setConfigs] = useState(state.applianceConfigs || {})
   const [showCustom, setShowCustom] = useState(false)
+  const [backendDevices, setBackendDevices] = useState([])
+
+  useEffect(() => {
+    getDevices().then(setBackendDevices)
+  }, [])
 
   useEffect(() => {
     setSelected(state.selectedAppliances || [])
@@ -22,9 +35,33 @@ export default function AppliancesPage() {
     update('selectedAppliances', next)
   }
 
-  const handleNext = () => {
+  const handleNext = async () => {
     update('selectedAppliances', selected)
     update('applianceConfigs', { ...(state.applianceConfigs || {}), ...configs })
+
+    for (const id of selected) {
+      const cfg = { ...(configs[id] || {}), ...appliancePresets.find((p) => p.id === id) }
+      const stockName = stockNameMap[id]
+
+      if (stockName) {
+        const device = backendDevices.find((d) => d.stockName === stockName)
+        if (device) {
+          await createDeviceInstance({
+            deviceId: device.id,
+            frequency: frequencyToNumber(cfg.frequency),
+            duration: minutesToHours(cfg.duration),
+          })
+        }
+      } else {
+        const custom = await createDevice({ name: cfg.name, powerDraw: cfg.estimatedKwh || 1.0 })
+        await createDeviceInstance({
+          deviceId: custom.id,
+          frequency: frequencyToNumber(cfg.frequency),
+          duration: minutesToHours(cfg.duration),
+        })
+      }
+    }
+
     navigate({ to: '/onboarding/availability' })
   }
 

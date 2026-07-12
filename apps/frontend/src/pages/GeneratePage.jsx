@@ -1,85 +1,146 @@
-import { useNavigate } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
+import { Link, useNavigate } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
+import { ArrowRight, Check, Leaf, PiggyBank, Zap } from 'lucide-react'
 import { useWattWhen } from '../lib/WattWhenContext.jsx'
-import SustainabilityTip from '../components/SustainabilityTip.jsx'
+import { DuckMark } from '../components/Brand.jsx'
+import { providerOptions } from '../data/providerData.js'
+import { savingsSummary } from '../data/savingsData.js'
+import { weeklySummary } from '../data/scheduleData.js'
 
 const steps = [
-  'Reviewing your provider…',
-  'Reviewing your appliances…',
-  'Reviewing your availability…',
-  'Preparing your calendar…',
-  'Building your sample plan…',
+  'Matching your electricity provider',
+  'Estimating appliance electricity use',
+  'Mapping unavailable times',
+  'Comparing candidate time windows',
+  'Checking household task overlap',
+  'Building your weekly schedule',
+]
+
+const tips = [
+  'Dishwashers are generally most efficient when run with a full load.',
+  'Avoiding several high-energy tasks at once can reduce household demand spikes.',
+  'WattWhen never moves tasks that you marked as fixed.',
+  'Cold-water laundry cycles may reduce electricity used for water heating.',
+  'Sleep mode can reduce unnecessary computer electricity use.',
+  'Charging an EV overnight often avoids the busiest household demand window.',
 ]
 
 export default function GeneratePage() {
-  const { update } = useWattWhen()
+  const { state, update } = useWattWhen()
   const navigate = useNavigate()
-  const [currentStep, setCurrentStep] = useState(0)
+  const [step, setStep] = useState(0)
+  const [tip, setTip] = useState(0)
   const [done, setDone] = useState(false)
 
+  const householdName = state.account?.name?.split(/\s+/)[0] || 'Your'
+  const selectedAppliances = state.selectedAppliances?.length || 0
+  const selectedProviderId = state.providerSelection || state.provider
+  const providerName = providerOptions.find((provider) => provider.id === selectedProviderId)?.name || 'your provider'
+  const monthlySavings = Math.round(savingsSummary.thisMonth)
+  const weeklyUsage = weeklySummary.totalKwh
+  const shiftedKwh = weeklySummary.shiftedKwh
+  const baselineWeeklyUsage = Math.round(weeklyUsage + shiftedKwh)
+
   useEffect(() => {
-    if (currentStep < steps.length) {
-      const timer = setTimeout(() => setCurrentStep((s) => s + 1), 1200)
-      return () => clearTimeout(timer)
-    } else {
-      update('onboardingComplete', true)
-      setDone(true)
-    }
-  }, [currentStep])
+    if (done) return
+    const timer = setTimeout(() => {
+      if (step < steps.length - 1) {
+        setStep((value) => value + 1)
+        setTip((value) => (value + 1) % tips.length)
+      } else {
+        update('onboardingComplete', true)
+        setDone(true)
+      }
+    }, 900)
+    return () => clearTimeout(timer)
+  }, [step, done, update])
+
+  if (done) {
+    return (
+      <div className="ww-generate-page ww-generate-complete">
+        <div className="ww-generate-complete-shell">
+          <div className="ww-plan-ready-mark">
+            <DuckMark size={74} />
+            <span className="ww-kicker">PLAN READY</span>
+          </div>
+          <h1>{householdName} is ready to save.</h1>
+          <p className="ww-plan-intro">
+            Based on your location, provider, appliance mix, and schedule preferences, we mapped out a week that uses cleaner and cheaper energy hours more often.
+          </p>
+          <p className="ww-plan-context">
+            Your plan reflects {providerName}, {selectedAppliances} selected appliances, and the timing windows you marked as available during onboarding.
+          </p>
+
+          <div className="ww-plan-summary-grid">
+            <article className="ww-plan-card ww-plan-card-savings">
+              <div className="ww-plan-card-icon"><PiggyBank size={34} /></div>
+              <div className="ww-plan-card-copy">
+                <strong>${monthlySavings}</strong>
+                <span>estimated monthly savings</span>
+                <small>on your electric bill</small>
+              </div>
+            </article>
+
+            <article className="ww-plan-card ww-plan-card-usage">
+              <div className="ww-plan-card-icon"><Zap size={34} /></div>
+              <div className="ww-plan-card-copy">
+                <strong>{weeklyUsage.toFixed(1)} kWh</strong>
+                <span>estimated weekly usage</span>
+                <small>down from {baselineWeeklyUsage} kWh/week</small>
+                <em>{shiftedKwh.toFixed(0)} kWh shifted to cleaner energy hours</em>
+              </div>
+            </article>
+
+            <article className="ww-plan-card ww-plan-card-peak">
+              <div className="ww-plan-card-icon"><Zap size={34} /></div>
+              <div className="ww-plan-card-copy">
+                <strong>22%</strong>
+                <span>less peak-hour usage</span>
+                <small>Your flexible tasks move into cleaner, cheaper time windows.</small>
+              </div>
+            </article>
+          </div>
+
+          <div className="ww-plan-footnote">
+            <Leaf size={15} />
+            <span>You&apos;ll find the full schedule, suggested shifts, and savings breakdown on your dashboard.</span>
+          </div>
+
+          <div className="ww-plan-actions">
+            <button onClick={() => navigate({ to: '/home' })} className="ww-plan-primary">
+              Open my dashboard <ArrowRight size={16} />
+            </button>
+          </div>
+
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="mx-auto flex max-w-md flex-col items-center justify-center p-4 py-16">
-      <div className="mb-2 flex items-center gap-2">
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--lagoon)] text-xs font-bold text-white">5</span>
-        <span className="text-xs font-medium text-[var(--sea-ink-soft)]">Step 5 of 5</span>
-      </div>
-
-      <h1 className="mb-6 text-xl font-bold text-[var(--sea-ink)]">
-        {done ? 'Your plan is ready!' : 'Generating your plan…'}
-      </h1>
-
-      <div className="mb-8 w-full space-y-3">
-        {steps.map((step, i) => (
-          <div key={i} className="flex items-center gap-3">
-            <div className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
-              i < currentStep ? 'bg-[var(--lagoon)] text-white' :
-              i === currentStep ? 'border-2 border-[var(--lagoon)] text-[var(--lagoon)]' :
-              'border-2 border-[var(--line)] text-[var(--sea-ink-soft)]'
-            }`}>
-              {i < currentStep ? '✓' : i + 1}
-            </div>
-            <span className={`text-sm ${i < currentStep ? 'text-[var(--sea-ink)]' : i === currentStep ? 'font-medium text-[var(--lagoon-deep)]' : 'text-[var(--sea-ink-soft)]'}`}>
-              {step}
-            </span>
+    <div className="ww-generate-page">
+      <section className="ww-generate-progress">
+        <div>
+          <span className="ww-kicker">BUILDING YOUR PLAN</span>
+          <h1>Finding better electricity windows...</h1>
+          <div className="ww-generate-steps">
+            {steps.map((label, index) => (
+              <div className={index < step ? 'complete' : index === step ? 'active' : ''} key={label}>
+                <i>{index < step ? <Check size={12} /> : index === step ? <b /> : null}</i>
+                <span>{label}</span>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-
-      {!done && (
-        <p className="mb-4 text-center text-xs text-[var(--sea-ink-soft)]">
-          This is a simulated loading sequence. No real calculations are being performed.
-        </p>
-      )}
-
-      {!done && <SustainabilityTip />}
-
-      {done && (
-        <div className="w-full space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-xl border border-[var(--line)] bg-[var(--foam)] p-3 text-center">
-              <p className="text-lg font-bold text-[var(--lagoon)]">12</p>
-              <p className="text-[11px] text-[var(--sea-ink-soft)]">Scheduled tasks</p>
-            </div>
-            <div className="rounded-xl border border-[var(--line)] bg-[var(--foam)] p-3 text-center">
-              <p className="text-lg font-bold text-[var(--lagoon)]">82</p>
-              <p className="text-[11px] text-[var(--sea-ink-soft)]">Timing score</p>
-            </div>
-          </div>
-          <button onClick={() => navigate({ to: '/home' })} className="flex w-full items-center justify-center gap-1 rounded-xl bg-[var(--lagoon)] py-3 text-sm font-semibold text-white hover:bg-[var(--lagoon-deep)]">
-            Open my dashboard
-          </button>
+          <div className="ww-generate-bar"><i style={{ width: `${((step + 1) / steps.length) * 100}%` }} /></div>
+          <small>Simulated recommendations using placeholder electricity data.</small>
         </div>
-      )}
+      </section>
+      <aside className="ww-generate-tips">
+        <DuckMark size={68} inverse />
+        <span>Did you know?</span>
+        <p key={tip} className="ww-tip-transition">{tips[tip]}</p>
+        <div>{tips.map((_, index) => <i className={index === tip ? 'active' : ''} key={index} />)}</div>
+      </aside>
     </div>
   )
 }
