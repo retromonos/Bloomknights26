@@ -110,7 +110,7 @@ export type UtilityRateWindow = {
 
 /** Lower is cleaner. Units are up to the provider — only relative ordering matters. */
 export interface EnvironmentalScoreProvider {
-  getIntensity(dayOfWeek: DayOfWeek, hourOfDay: number): number;
+  getIntensity(dayOfWeek: DayOfWeek, hourOfDay: number): Promise<number>;
 }
 
 export type SchedulingStrategy =
@@ -214,11 +214,16 @@ export class HeuristicGridEnvironmentalProvider implements EnvironmentalScorePro
     0.95, 0.8, 0.68, 0.6,
   ];
 
-  getIntensity(dayOfWeek: DayOfWeek, hourOfDay: number): number {
+  getIntensity(dayOfWeek: DayOfWeek, hourOfDay: number): Promise<number> {
     const hour = mod(Math.floor(hourOfDay), 24);
     const base = HeuristicGridEnvironmentalProvider.HOURLY_SHAPE[hour]!;
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-    return isWeekend ? base * 0.95 : base;
+
+    async function res() {
+      return isWeekend ? base * 0.95 : base
+    }
+
+    return res();
   }
 }
 
@@ -360,7 +365,7 @@ function ratesHaveOverlap(rates: UtilityRateWindow[]): boolean {
 // Environmental scoring
 // ─────────────────────────────────────────────────────────────────────────────────
 
-function rawEnvironmentalScore(candidate: Candidate, provider: EnvironmentalScoreProvider, granularity: number): number {
+async function rawEnvironmentalScore(candidate: Candidate, provider: EnvironmentalScoreProvider, granularity: number): Promise<number> {
   const startOfDay = candidate.start - candidate.dayOfWeek * DAY_MINUTES;
   const endOfDay = candidate.end - candidate.dayOfWeek * DAY_MINUTES;
 
@@ -368,11 +373,11 @@ function rawEnvironmentalScore(candidate: Candidate, provider: EnvironmentalScor
   let samples = 0;
   for (let m = startOfDay; m < endOfDay; m += granularity) {
     const hour = Math.floor((m + granularity / 2) / 60) % 24;
-    sum += provider.getIntensity(candidate.dayOfWeek, hour);
+    sum += await provider.getIntensity(candidate.dayOfWeek, hour);
     samples++;
   }
   if (samples === 0) {
-    return provider.getIntensity(candidate.dayOfWeek, Math.floor(startOfDay / 60) % 24);
+    return await provider.getIntensity(candidate.dayOfWeek, Math.floor(startOfDay / 60) % 24);
   }
   const avgIntensity = sum / samples;
   const durationHours = (endOfDay - startOfDay) / 60;
@@ -529,7 +534,7 @@ function buildScheduleItem(
 // Public entry point
 // ─────────────────────────────────────────────────────────────────────────────────
 
-export function generateWeeklySchedule(params: GenerateScheduleParams): GenerateScheduleResult {
+export async function generateWeeklySchedule(params: GenerateScheduleParams): Promise<GenerateScheduleResult> {
   const {
     userId,
     powerItems,
@@ -584,10 +589,17 @@ export function generateWeeklySchedule(params: GenerateScheduleParams): Generate
 
     const candidates = generateCandidates(durationMinutes, granularity);
 
+    const retRawEnv = []
+
     const rawCosts = candidates.map((c) => rawCostScore(c, item.powerDraw, utilityRates));
-    const rawEnv = candidates.map((c) => rawEnvironmentalScore(c, environmentalProvider, granularity));
+    const rawEnv = candidates.map(async (c) => await rawEnvironmentalScore(c, environmentalProvider, granularity));
+
+    for (let i = 0; i < rawEnv.length; i++) {
+      retRawEnv?.push(await rawEnv[i] ?? 0)
+    }
+
     const costNorm = normalizeScores(rawCosts);
-    const envNorm = normalizeScores(rawEnv);
+    const envNorm = normalizeScores(retRawEnv);
 
     // Candidates that overlap blocked intervals get a heavy penalty so they are
     // only chosen when no clean slot exists.  The penalty is large enough that

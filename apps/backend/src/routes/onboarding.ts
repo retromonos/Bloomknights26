@@ -49,15 +49,19 @@ export async function handleOnboardRequest(req: Request, res: Response) {
             return
         }
 
-        await prisma.user.update({
-            where: {
-                id: currentUser.id
-            },
+        await prisma.countyInstance.create({
             data: {
-                countyId: county.id,
+                userId: currentUser.id,
+                countyId: county.id
+            }
+        })
+
+        await prisma.utilityInstance.create({
+            data: {
+                userId: currentUser.id,
                 utilityId: utility.id
             }
-        });
+        })
 
         res.status(200).json({ message: "Onboarding successful" });
     } catch (err: any) {

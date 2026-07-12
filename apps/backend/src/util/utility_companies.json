@@ -2,6 +2,7 @@
     "utilities": [
         {
             "name": "Florida Power & Light Company",
+            "code": "FPL",
             "rates": [
                 {
                     "name": "Peak",
@@ -25,6 +26,7 @@
         },
         {
             "name": "Duke Energy",
+            "code": "FPC",
             "rates": [
                 {
                     "name": "Peak",
@@ -54,6 +56,7 @@
         },
         {
             "name": "Orlando Utilities Commission",
+            "code": "FMPP",
             "rates": [
                 {
                     "name": "Peak",

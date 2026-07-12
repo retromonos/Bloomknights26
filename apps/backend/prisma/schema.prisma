@@ -103,6 +103,7 @@ model Utility {
   name             String            @unique
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
+  dataCode         String            @default("")
   countyUtilities  CountyUtility[]
   utilityInstances UtilityInstance[]
   utilityRates     UtilityRate[]
@@ -124,7 +125,6 @@ model CountyUtility {
 
 model UtilityInstance {
   id        String   @id @default(cuid())
-  name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   utilityId String

@@ -6,7 +6,7 @@ import { toNodeHandler } from "better-auth/node";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 
-import loadCounties, { requestCountyFromZip } from "./routes/geo.js";
+import loadCounties, { GetProductionData, requestCountyFromZip } from "./routes/geo.js";
 import { createDevice, createDeviceInstance, deleteDeviceInstance, getDeviceInstances, getDevices, populateDevices, updateDeviceInstance } from "./routes/devices.js";
 import { handleSchedulerRequest } from "./routes/scheduler.js";
 import { GetUtilitiesByCounty, handleOnboardRequest } from "./routes/onboarding.js";

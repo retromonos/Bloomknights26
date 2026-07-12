@@ -26,9 +26,23 @@ function CountyProviderPanel({ open }) {
   const navigate = useNavigate()
   const selected = state.providerSelection || state.provider || ''
   const choose = (value) => update('providerSelection', value)
-  const continueToAppliances = () => {
+  const continueToAppliances = async () => {
     update('provider', selected === 'generic' ? null : selected)
     update('useGenericProviderEstimate', selected === 'generic')
+
+    foundUtilities.find((u)=>{
+      return u.id === selected
+    }).name
+
+    await fetch("http://localhost:3001/api/onboard", {
+      method: "POST",
+      body: JSON.stringify({county: state.detectedCounty, utilityCompany: foundUtilities.find((u)=>{return u.id === selected}).name}),
+      headers: {
+        'Authorization': `Bearer ${state.account?.token?.trim().split(/\s+/)[0]}`,
+        'Content-Type': 'application/json'
+      }
+    })
+
     navigate({ to: '/onboarding/appliances' })
   }
 

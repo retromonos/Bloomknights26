@@ -1,10 +1,11 @@
 import type { Request, Response } from "express";
-import type { CustomDeviceRequest, DeviceInstance, DeviceRequest, PopulatedDeviceInstance, PowerItem, ScheduleRequest, SchedulingStrategyType, TimeBlock } from "@bloomknights/types"
-import { auth } from "../app";
+import type { CustomDeviceRequest, DayOfWeek, DeviceInstance, DeviceRequest, PopulatedDeviceInstance, PowerItem, ScheduleRequest, SchedulingStrategyType, TimeBlock } from "@bloomknights/types"
+import { auth, prisma } from "../app";
 import { createDeviceInstance, getDeviceByStockName, populateDeviceInstance } from "../repository/deviceRepository";
 import { createTimeBlock } from "../repository/timeBlockRepository";
 import { getUtilityRatesForUser } from "../repository/utilityRepository";
 import { generateWeeklySchedule } from "../lib/scheduler";
+import { ProductionData } from "./geo";
 
 function resolveStrategy(preference?: SchedulingStrategyType) {
     switch (preference) {
@@ -62,15 +63,46 @@ export async function handleSchedulerRequest(req: Request, res: Response) {
 
         const utilityRates = await getUtilityRatesForUser(session.user.id);
 
-        const weeklySchedule = generateWeeklySchedule({
+        const utilityI = await prisma.utilityInstance.findFirst({
+            where: {
+                userId: session.user.id
+            }
+        })
+
+        const utility = await prisma.utility.findFirst({
+            where: {
+                id: utilityI?.utilityId || ""
+            }
+        })
+
+        const getIntensity = async (dayOfWeek:DayOfWeek, hourOfDay: number) : Promise<number> => {
+            const data = await ProductionData(utility ? utility.name : "Duke Energy")
+
+            let max = 0
+            const total:number[] = []
+
+            for(let i = 0; i < data.clean.length; i++) {
+                const contender = (data.clean[i]??0) + (data.normal[i]??0)
+                total.push(contender)
+                if(contender > max)
+                    max = contender
+            }
+
+            const newClean = data.clean.map((v) => v/max)
+            const newTotal = total.map((v) => v/max)
+
+            return (newTotal[hourOfDay] ?? 0) - (newClean[hourOfDay] ?? 0)
+        }
+
+        const weeklySchedule = await generateWeeklySchedule({
             userId: session.user.id,
             powerItems,
             timeBlocks: schedulerTimeBlocks,
             utilityRates,
             strategy: resolveStrategy(body.strategy),
             options: { deviceNames },
+            environmentalProvider: {getIntensity}
         });
-
 
         return res.json({
             scheduleItems: weeklySchedule.scheduleItems,
