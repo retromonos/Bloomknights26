@@ -10,6 +10,8 @@ const stockNameMap = {
   'dishwasher': 'dishwasher',
   'gaming-pc': 'pc-gaming',
   'ev-charger': 'ev-charging-wall',
+  'cooking': 'cooking',
+  'device-charging': 'device-charging',
 }
 
 export default function AppliancesPage() {
@@ -40,7 +42,7 @@ export default function AppliancesPage() {
     update('applianceConfigs', { ...(state.applianceConfigs || {}), ...configs })
 
     for (const id of selected) {
-      const cfg = { ...(configs[id] || {}), ...appliancePresets.find((p) => p.id === id) }
+      const cfg = { ...appliancePresets.find((p) => p.id === id), ...(configs[id] || {}) }
       const stockName = stockNameMap[id]
 
       if (stockName) {

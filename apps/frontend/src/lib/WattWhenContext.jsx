@@ -18,6 +18,7 @@ const defaultState = {
   selectedAppliances: [],
   applianceConfigs: {},
   scheduleReady: false,
+  scheduleResult: null,
   availability: {
     sleepStart: '',
     sleepEnd: '',
